@@ -130,6 +130,37 @@ class main {
 		return sb.toString();
 	}
 	
+	private static SudokuFile generateBoardFromFile(String input){
+		System.out.println("Generating board from file");
+		SudokuFile sf = null;
+		BufferedReader br = null;
+		String[] tokens = null;
+		try{
+			br = new BufferedReader(new FileReader(input));
+			String line = br.readLine();
+			tokens = line.split("\\s+");
+			if(tokens.length != 4){
+				System.err.println("File does not have exactly 4 arguments");
+				return null;
+			}		
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if(br != null){
+				try {
+					br.close();
+				} catch (Exception e2) { e2.printStackTrace(); }
+			}
+		}
+		
+		int n = Integer.parseInt(tokens[0]);
+		int p = Integer.parseInt(tokens[1]);
+		int q = Integer.parseInt(tokens[2]);
+		int numAssign = Integer.parseInt(tokens[3]);
+		
+		return SudokuBoardGenerator.generateBoard(n, p, q, numAssign);
+	}
+	
 	public static void main(String[] args) {
 		if(args.length < 3){
 			System.err.println("Need atleast 3 arguments");
@@ -142,8 +173,13 @@ class main {
 		String outputFile = args[1]; 
 		int timeOut = Integer.parseInt(args[2]); 
 		
-		SudokuBoardReader reader = new SudokuBoardReader(); 
-		SudokuFile sf = reader.readFile(inputFile); 
+		SudokuFile sf = null;
+
+		if(args.length >= 4 && args[3].equals("GEN")){
+			sf = generateBoardFromFile(inputFile);
+		} else {
+			sf = SudokuBoardReader.readFile(inputFile); 
+		}
 		
 		System.out.println(sf.toString()); 
 		
