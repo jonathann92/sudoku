@@ -94,9 +94,49 @@ class main {
 		
 	}
 	
-	public static void main(String[] args) {
+	private static String Transpose(SudokuFile sf){
+		int N = sf.getN(), p = sf.getP(), q = sf.getQ();
+		int board[][] = sf.getBoard();
+		StringBuilder sb = new StringBuilder();
+		sb.append("N: ");
+		sb.append(N);
+		sb.append("\tP: ");
+		sb.append(p);
+		sb.append("\tQ: ");
+		sb.append(q);
+		sb.append("\n");
 		
-		long programStartTime = System.currentTimeMillis(); 
+		
+		for(int i = 0; i < N; i ++)
+		{
+			for(int j = 0; j < N; j++)
+			{
+				sb.append(Odometer.intToOdometer(board[j][i]) + " ");
+				if((j+1)%q==0 && j!= 0 && j != N-1)
+				{
+					sb.append("| ");
+				}
+			}
+			sb.append("\n");
+			if((i+1)%p == 0 && i != 0 && i != N-1)
+			{
+				for(int k = 0; k < N+p-1;k++)
+				{
+					sb.append("- ");
+				}
+				sb.append("\n");
+			}
+		}
+		return sb.toString();
+	}
+	
+	public static void main(String[] args) {
+		if(args.length < 3){
+			System.err.println("Need atleast 3 arguments");
+			return;
+		}
+		
+		long totalStartTime = System.currentTimeMillis(); 
 		
 		String inputFile = args[0]; 
 		String outputFile = args[1]; 
@@ -109,11 +149,13 @@ class main {
 		
 		BTSolver solver = new BTSolver(sf); 
 		
+		long ppStartTime = System.currentTimeMillis(); 
 		solver.setConsistencyChecks(ConsistencyCheck.None);
 		solver.setValueSelectionHeuristic(ValueSelectionHeuristic.None);
 		solver.setVariableSelectionHeuristic(VariableSelectionHeuristic.None);
+		long ppEndTime = System.currentTimeMillis();
 		
-		long startTime = System.currentTimeMillis(); 
+		long solverStartTime = System.currentTimeMillis(); 
 		
 		Thread t1 = new Thread(solver);
 		try
@@ -122,6 +164,7 @@ class main {
 			t1.join(timeOut * 1000);
 			if(t1.isAlive())
 			{
+				System.out.println(timeOut + " Seconds have passed, program will now timeout");
 				t1.interrupt();
 			}
 		}catch(InterruptedException e)
@@ -130,25 +173,31 @@ class main {
 		
 		long endTime = System.currentTimeMillis(); 
 		
-		System.out.println(solver.getSolution().toString()); 
+		System.out.println(Transpose(solver.getSolution()));
+
+
+		
 		
 		try {
 		
 			File fileOut = new File(outputFile); 
 			PrintWriter outputWriter = new PrintWriter(fileOut); 
 			
-			outputWriter.println("TOTAL_START=" + programStartTime / 1000); 
-			outputWriter.println("SEARCH_START=" + startTime / 1000); 
-			outputWriter.println("SEARCH_DONE=" + endTime / 1000); 
-			outputWriter.println(printStatus(solver, programStartTime, endTime)); 
+			outputWriter.println("TOTAL_START=" + totalStartTime / 1000.0); 
+			outputWriter.println("PREPROCESSING_START=" + ppStartTime / 1000.0);
+			outputWriter.println("PREPROCESSING_DONE=" + ppEndTime / 1000.0);
+			outputWriter.println("SEARCH_START=" + solverStartTime / 1000.0); 
+			outputWriter.println("SEARCH_DONE=" + endTime / 1000.0); 
+			outputWriter.println("SOLUTION_TIME=" + ((ppEndTime - ppStartTime) + (endTime - solverStartTime)) );
+			outputWriter.println(printStatus(solver, totalStartTime, endTime)); 
 			outputWriter.println("SOLUTION=" + printSolution(solver)); 
-			outputWriter.println("COUNT_NODES=" + countNumberOfNonEmpty(solver.getSolution())); 
+			outputWriter.println("COUNT_NODES=" + solver.getNumAssignments()); 
 			outputWriter.println("COUNT_DEADENDS=" + solver.getNumBacktracks());
 			
 			outputWriter.close(); 
 			
 		}
-		catch(Exception e){}
+		catch(Exception e){ e.printStackTrace();}
 		
 		
 	}
