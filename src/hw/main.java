@@ -1,6 +1,6 @@
 package hw;
 
-import sudoku.SudokuBoardGenerator; 
+import sudoku.SudokuBoardGenerator;
 import sudoku.SudokuFile; 
 import sudoku.Odometer; 
 import sudoku.Converter; 
@@ -166,7 +166,8 @@ class main {
 			System.err.println("Need atleast 3 arguments");
 			return;
 		}
-		
+		List<String> arguments = Arrays.asList(args);
+
 		long totalStartTime = System.currentTimeMillis(); 
 		
 		String inputFile = args[0]; 
@@ -186,7 +187,13 @@ class main {
 		BTSolver solver = new BTSolver(sf); 
 		
 		long ppStartTime = System.currentTimeMillis(); 
-		solver.setConsistencyChecks(ConsistencyCheck.ForwardChecking);
+		
+		solver.setConsistencyChecks(ConsistencyCheck.None);
+		if(arguments.contains("FC") || arguments.contains("fc")){
+			System.out.println("Forward Checking");
+			solver.setConsistencyChecks(ConsistencyCheck.ForwardChecking);
+		}
+		
 		solver.setValueSelectionHeuristic(ValueSelectionHeuristic.None);
 		solver.setVariableSelectionHeuristic(VariableSelectionHeuristic.None);
 		long ppEndTime = System.currentTimeMillis();
