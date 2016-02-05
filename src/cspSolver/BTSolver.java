@@ -6,7 +6,7 @@ import java.util.List;
 import sudoku.Converter;
 import sudoku.SudokuFile;
 /**
- * Backtracking solver. 
+ * Backtracking solver.
  *
  */
 public class BTSolver implements Runnable{
@@ -24,11 +24,11 @@ public class BTSolver implements Runnable{
 	private int numBacktracks;
 	private long startTime;
 	private long endTime;
-	
+
 	public enum VariableSelectionHeuristic 	{ None, MinimumRemainingValue, Degree };
 	public enum ValueSelectionHeuristic 		{ None, LeastConstrainingValue };
 	public enum ConsistencyCheck				{ None, ForwardChecking, ArcConsistency };
-	
+
 	private VariableSelectionHeuristic varHeuristics;
 	private ValueSelectionHeuristic valHeuristics;
 	private ConsistencyCheck cChecks;
@@ -47,17 +47,17 @@ public class BTSolver implements Runnable{
 	//===============================================================================
 	// Modifiers
 	//===============================================================================
-	
+
 	public void setVariableSelectionHeuristic(VariableSelectionHeuristic vsh)
 	{
 		this.varHeuristics = vsh;
 	}
-	
+
 	public void setValueSelectionHeuristic(ValueSelectionHeuristic vsh)
 	{
 		this.valHeuristics = vsh;
 	}
-	
+
 	public void setConsistencyChecks(ConsistencyCheck cc)
 	{
 		this.cChecks = cc;
@@ -66,8 +66,8 @@ public class BTSolver implements Runnable{
 	// Accessors
 	//===============================================================================
 
-	/** 
-	 * @return true if a solution has been found, false otherwise. 
+	/**
+	 * @return true if a solution has been found, false otherwise.
 	 */
 	public boolean hasSolution()
 	{
@@ -90,7 +90,7 @@ public class BTSolver implements Runnable{
 	}
 
 	/**
-	 * 
+	 *
 	 * @return time required for the solver to attain in seconds
 	 */
 	public long getTimeTaken()
@@ -118,17 +118,17 @@ public class BTSolver implements Runnable{
 	//===============================================================================
 
 	/**
-	 * Checks whether the changes from the last time this method was called are consistent. 
+	 * Checks whether the changes from the last time this method was called are consistent.
 	 * @return true if consistent, false otherwise
 	 */
-	private boolean checkConsistency()
+	private boolean checkConsistency(Variable v)
 	{
 		boolean isConsistent = false;
 		switch(cChecks)
 		{
 		case None: 				isConsistent = assignmentsCheck();
 		break;
-		case ForwardChecking: 	isConsistent = forwardChecking();
+		case ForwardChecking: 	isConsistent = forwardChecking(v);
 		break;
 		case ArcConsistency: 	isConsistent = arcConsistency();
 		break;
@@ -137,10 +137,10 @@ public class BTSolver implements Runnable{
 		}
 		return isConsistent;
 	}
-	
+
 	/**
 	 * default consistency check. Ensures no two variables are assigned to the same value.
-	 * @return true if consistent, false otherwise. 
+	 * @return true if consistent, false otherwise.
 	 */
 	private boolean assignmentsCheck()
 	{
@@ -159,15 +159,24 @@ public class BTSolver implements Runnable{
 		}
 		return true;
 	}
-	
+
 	/**
-	 * TODO: Implement forward checking. 
+	 * TODO: Implement forward checking.
 	 */
-	private boolean forwardChecking()
+	private boolean forwardChecking(Variable v)
 	{
-		return false;
+		for(Variable k : network.getVariables()){
+			if(k.isAssigned()){
+				int num = k.getAssignment();
+				for(Variable other : network.getNeighborsOfVariable(k)){
+					other.removeValueFromDomain(num);
+					if(other.size() == 0) return false;
+				}
+			}
+		}
+		return true;
 	}
-	
+
 	/**
 	 * TODO: Implement Maintaining Arc Consistency.
 	 */
@@ -175,10 +184,10 @@ public class BTSolver implements Runnable{
 	{
 		return false;
 	}
-	
+
 	/**
 	 * Selects the next variable to check.
-	 * @return next variable to check. null if there are no more variables to check. 
+	 * @return next variable to check. null if there are no more variables to check.
 	 */
 	private Variable selectNextVariable()
 	{
@@ -196,10 +205,10 @@ public class BTSolver implements Runnable{
 		}
 		return next;
 	}
-	
+
 	/**
-	 * default next variable selection heuristic. Selects the first unassigned variable. 
-	 * @return first unassigned variable. null if no variables are unassigned. 
+	 * default next variable selection heuristic. Selects the first unassigned variable.
+	 * @return first unassigned variable. null if no variables are unassigned.
 	 */
 	private Variable getfirstUnassignedVariable()
 	{
@@ -215,13 +224,13 @@ public class BTSolver implements Runnable{
 
 	/**
 	 * TODO: Implement MRV heuristic
-	 * @return variable with minimum remaining values that isn't assigned, null if all variables are assigned. 
+	 * @return variable with minimum remaining values that isn't assigned, null if all variables are assigned.
 	 */
 	private Variable getMRV()
 	{
 		return null;
 	}
-	
+
 	/**
 	 * TODO: Implement Degree heuristic
 	 * @return variable constrained by the most unassigned variables, null if all variables are assigned.
@@ -230,11 +239,11 @@ public class BTSolver implements Runnable{
 	{
 		return null;
 	}
-	
+
 	/**
-	 * Value Selection Heuristics. Orders the values in the domain of the variable 
+	 * Value Selection Heuristics. Orders the values in the domain of the variable
 	 * passed as a parameter and returns them as a list.
-	 * @return List of values in the domain of a variable in a specified order. 
+	 * @return List of values in the domain of a variable in a specified order.
 	 */
 	public List<Integer> getNextValues(Variable v)
 	{
@@ -250,16 +259,16 @@ public class BTSolver implements Runnable{
 		}
 		return orderedValues;
 	}
-	
+
 	/**
-	 * Default value ordering. 
+	 * Default value ordering.
 	 * @param v Variable whose values need to be ordered
-	 * @return values ordered by lowest to highest. 
+	 * @return values ordered by lowest to highest.
 	 */
 	public List<Integer> getValuesInOrder(Variable v)
 	{
 		List<Integer> values = v.getDomain().getValues();
-		
+
 		Comparator<Integer> valueComparator = new Comparator<Integer>(){
 
 			@Override
@@ -270,7 +279,7 @@ public class BTSolver implements Runnable{
 		Collections.sort(values, valueComparator);
 		return values;
 	}
-	
+
 	/**
 	 * TODO: LCV heuristic
 	 */
@@ -309,8 +318,8 @@ public class BTSolver implements Runnable{
 
 	/**
 	 * Solver
-	 * @param level How deep the solver is in its recursion. 
-	 * @throws VariableSelectionException 
+	 * @param level How deep the solver is in its recursion.
+	 * @throws VariableSelectionException
 	 */
 
 	private void solve(int level) throws VariableSelectionException
@@ -324,7 +333,7 @@ public class BTSolver implements Runnable{
 			}
 
 			//Select unassigned variable
-			Variable v = selectNextVariable();		
+			Variable v = selectNextVariable();
 
 			//check if the assignment is complete
 			if(v == null)
@@ -342,7 +351,7 @@ public class BTSolver implements Runnable{
 
 			//loop through the values of the variable being checked LCV
 
-			
+
 			for(Integer i : getNextValues(v))
 			{
 				trail.placeBreadCrumb();
@@ -350,11 +359,11 @@ public class BTSolver implements Runnable{
 				//check a value
 				v.updateDomain(new Domain(i));
 				numAssignments++;
-				boolean isConsistent = checkConsistency();
-				
+				boolean isConsistent = checkConsistency(v);
+
 				//move to the next assignment
 				if(isConsistent)
-				{		
+				{
 					solve(level + 1);
 				}
 
@@ -364,13 +373,13 @@ public class BTSolver implements Runnable{
 					trail.undo();
 					numBacktracks++;
 				}
-				
+
 				else
 				{
 					return;
 				}
-			}	
-		}	
+			}
+		}
 	}
 
 	@Override

@@ -186,7 +186,7 @@ class main {
 		BTSolver solver = new BTSolver(sf); 
 		
 		long ppStartTime = System.currentTimeMillis(); 
-		solver.setConsistencyChecks(ConsistencyCheck.None);
+		solver.setConsistencyChecks(ConsistencyCheck.ForwardChecking);
 		solver.setValueSelectionHeuristic(ValueSelectionHeuristic.None);
 		solver.setVariableSelectionHeuristic(VariableSelectionHeuristic.None);
 		long ppEndTime = System.currentTimeMillis();
