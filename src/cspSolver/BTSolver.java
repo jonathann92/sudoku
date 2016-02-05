@@ -1,7 +1,10 @@
 package cspSolver;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import sudoku.Converter;
 import sudoku.SudokuFile;
@@ -159,23 +162,38 @@ public class BTSolver implements Runnable{
 		}
 		return true;
 	}
+	
+	private boolean isConsistent(Variable v){
+		for(Variable neighbor: network.getNeighborsOfVariable(v)){
+			if(v.getAssignment() == neighbor.getAssignment())
+				return false;
+		}
+		return true;
+	}
 
 	/**
 	 * TODO: Implement forward checking.
 	 */
-	private boolean forwardChecking(Variable v)
-	{
-		for(Variable k : network.getVariables()){
-			if(k.isAssigned()){
-				int num = k.getAssignment();
-				for(Variable other : network.getNeighborsOfVariable(k)){
-					other.removeValueFromDomain(num);
-					if(other.size() == 0) return false;
-				}
-			}
+	private boolean forwardChecking(Variable v){
+		int num = v.getAssignment();
+		for(Variable vOther : network.getNeighborsOfVariable(v)){
+			vOther.removeValueFromDomain(num);
+			if(vOther.size() == 0 || ( vOther.isAssigned() && !isConsistent(vOther))) return false;
 		}
 		return true;
 	}
+
+//		for(Variable k : network.getVariables()){
+//			if(k.isAssigned()){
+//				int num = k.getAssignment();
+//				for(Variable other : network.getNeighborsOfVariable(k)){
+//					other.removeValueFromDomain(num);
+//					if(other.size() == 0) return false;
+//				}
+//			}
+//		}
+//		return true;
+//	}
 
 	/**
 	 * TODO: Implement Maintaining Arc Consistency.
@@ -308,8 +326,9 @@ public class BTSolver implements Runnable{
 		startTime = System.currentTimeMillis();
 		try {
 			solve(0);
-		}catch (VariableSelectionException e)
+		}catch (Exception e)
 		{
+			e.printStackTrace();
 			System.out.println("error with variable selection heuristic.");
 		}
 		endTime = System.currentTimeMillis();
@@ -319,10 +338,10 @@ public class BTSolver implements Runnable{
 	/**
 	 * Solver
 	 * @param level How deep the solver is in its recursion.
-	 * @throws VariableSelectionException
+	 * @throws Exception 
 	 */
 
-	private void solve(int level) throws VariableSelectionException
+	private void solve(int level) throws Exception
 	{
 		if(!Thread.currentThread().isInterrupted())
 
@@ -342,8 +361,13 @@ public class BTSolver implements Runnable{
 				{
 					if(!var.isAssigned())
 					{
+						System.out.println(var.getName() +" IS NOT ASSIGNED");
+						System.out.println(sudokuGrid);
 						throw new VariableSelectionException("Something happened with the variable selection heuristic");
 					}
+				}
+				if(!assignmentsCheck()){
+					throw new Exception("Something went wrong!");
 				}
 				success();
 				return;
@@ -372,10 +396,7 @@ public class BTSolver implements Runnable{
 				{
 					trail.undo();
 					numBacktracks++;
-				}
-
-				else
-				{
+				} else {
 					return;
 				}
 			}

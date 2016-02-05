@@ -4,21 +4,21 @@ import java.util.EmptyStackException;
 import java.util.Stack;
 
 /**
- * Represents the trail of changes made. This allows backtracking to occur. 
- * Trail follows the singleton design pattern. 
+ * Represents the trail of changes made. This allows backtracking to occur.
+ * Trail follows the singleton design pattern.
  */
 public class Trail {
-	
+
 	//===============================================================================
 	// Properties
 	//===============================================================================
-	
+
 	private static Stack<Object[]> trail = new Stack<Object[]>();
 	private static final Trail TRAIL = new Trail();
 	private static Stack<Integer> breadcrumbs = new Stack<Integer>();
 	private Trail()
 	{}
-	
+
 	/**
 	 * returns the trail.
 	 * @return
@@ -27,7 +27,7 @@ public class Trail {
 	{
 		return TRAIL;
 	}
-	
+
 	public static void clearTrail()
 	{
 		trail.clear();
@@ -35,19 +35,19 @@ public class Trail {
 	//===============================================================================
 	// Accessors
 	//===============================================================================
-	
+
 	public int size()
 	{
 		return trail.size();
 	}
-	
+
 	//===============================================================================
 	// Modifiers
 	//===============================================================================
-	
+
 	/**
-	 * places a marker at the current point in the trail. Each time undo is called, the 
-	 * latest marker is popped and the trail 
+	 * places a marker at the current point in the trail. Each time undo is called, the
+	 * latest marker is popped and the trail
 	 */
 	public void placeBreadCrumb()
 	{
@@ -62,14 +62,14 @@ public class Trail {
 		Object[] vPair = { v, new Domain(v.getDomain())};
 		trail.push(vPair);
 	}
-	
+
 	/**
-	 * Pops changes pushed onto the trail until it reaches the latest marker. 
-	 * Also pops the latest marker. 
+	 * Pops changes pushed onto the trail until it reaches the latest marker.
+	 * Also pops the latest marker.
 	 * @param targetSize target position on the trail to backtrack to
 	 * @throws EmptyStackException if trail is empty
 	 */
-	public void undo() throws EmptyStackException 
+	public void undo() throws EmptyStackException
 	{
 		int targetSize = breadcrumbs.pop();
 		for (int size = trail.size(); size > targetSize; size--)
@@ -80,4 +80,3 @@ public class Trail {
 		}
 	}
 }
-

@@ -78,11 +78,11 @@ class main {
 	}
 	
 	// Prints the STATUS and SOLUTION_TIME given the circumstances
-	private static String printStatus(BTSolver solver, long programStartTime, long endTime){
+	private static String printStatus(BTSolver solver, long time){
 		
 		if (solver.hasSolution()){
 			
-			return "SOLUTION_TIME=" + ((endTime - programStartTime) / 1000) + "\n" + "STATUS=" + "success"; 
+			return "SOLUTION_TIME=" + ((time) / 1000.0) + "\n" + "STATUS=" + "success"; 
 			
 		}
 		
@@ -224,8 +224,8 @@ class main {
 			outputWriter.println("PREPROCESSING_DONE=" + ppEndTime / 1000.0);
 			outputWriter.println("SEARCH_START=" + solverStartTime / 1000.0); 
 			outputWriter.println("SEARCH_DONE=" + endTime / 1000.0); 
-			outputWriter.println("SOLUTION_TIME=" + ((ppEndTime - ppStartTime) + (endTime - solverStartTime)) );
-			outputWriter.println(printStatus(solver, totalStartTime, endTime)); 
+			//outputWriter.println("SOLUTION_TIME=" + ((ppEndTime - ppStartTime) + (endTime - solverStartTime)) );
+			outputWriter.println(printStatus(solver, ((ppEndTime - ppStartTime) + (endTime - solverStartTime)))); 
 			outputWriter.println("SOLUTION=" + printSolution(solver)); 
 			outputWriter.println("COUNT_NODES=" + solver.getNumAssignments()); 
 			outputWriter.println("COUNT_DEADENDS=" + solver.getNumBacktracks());
