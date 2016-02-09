@@ -183,18 +183,6 @@ public class BTSolver implements Runnable{
 		return true;
 	}
 
-//		for(Variable k : network.getVariables()){
-//			if(k.isAssigned()){
-//				int num = k.getAssignment();
-//				for(Variable other : network.getNeighborsOfVariable(k)){
-//					other.removeValueFromDomain(num);
-//					if(other.size() == 0) return false;
-//				}
-//			}
-//		}
-//		return true;
-//	}
-
 	/**
 	 * TODO: Implement Maintaining Arc Consistency.
 	 */
