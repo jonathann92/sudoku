@@ -15,27 +15,6 @@ import cspSolver.BTSolver;
 
 class main {
 	
-	// Returns the number of Non-Empty Slots of the Sudoku Board
-	private static int countNumberOfNonEmpty(SudokuFile sudoku){
-		
-		int empty = 0; 
-		int [][] board = sudoku.getBoard(); 
-		
-		for (int i = 0; i < sudoku.getN(); i++){
-			
-			for (int j = 0; j < sudoku.getN(); j++){
-				
-				if (board[i][j] != 0)
-					empty ++;
-				
-			}
-			
-		}
-		
-		return empty; 
-		
-	}
-	
 	private static String printSolution(BTSolver solver){
 		
 		String solution = "("; 
@@ -217,7 +196,7 @@ class main {
 		try {
 		
 			File fileOut = new File(outputFile); 
-			PrintWriter outputWriter = new PrintWriter(fileOut); 
+			PrintWriter outputWriter = new PrintWriter(System.out); 
 			
 			outputWriter.println("TOTAL_START=" + totalStartTime / 1000.0); 
 			outputWriter.println("PREPROCESSING_START=" + ppStartTime / 1000.0);
