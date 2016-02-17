@@ -6,6 +6,7 @@ import sudoku.Odometer;
 import sudoku.Converter; 
 import sudoku.SudokuBoardReader; 
 import cspSolver.BTSolver.ConsistencyCheck;
+import cspSolver.BTSolver.Preprocessing;
 import cspSolver.BTSolver.ValueSelectionHeuristic;
 import cspSolver.BTSolver.VariableSelectionHeuristic;
 import java.util.*;
@@ -28,7 +29,7 @@ class main {
 				
 				for (int l = 0; l < length; l++){
 					
-					solution = solution.concat(Integer.toString(solutionBoard[l][k]) + ","); 
+					solution = solution.concat(Integer.toString(solutionBoard[k][l]) + ","); 
 					
 				}
 				
@@ -111,7 +112,6 @@ class main {
 	
 	private static SudokuFile generateBoardFromFile(String input){
 		System.out.println("Generating board from file");
-		SudokuFile sf = null;
 		BufferedReader br = null;
 		String[] tokens = null;
 		try{
@@ -140,14 +140,33 @@ class main {
 		return SudokuBoardGenerator.generateBoard(n, p, q, numAssign);
 	}
 	
+	public static void setSolverMethods(BTSolver solver, List<String> arguments){
+		solver.setConsistencyChecks(ConsistencyCheck.None);
+		if(arguments.contains("FC")){
+			System.out.println("Forward Checking");
+			solver.setConsistencyChecks(ConsistencyCheck.ForwardChecking);
+		}
+		if(arguments.contains("MAC")){
+			System.out.println("Arc Consistency");
+			solver.setConsistencyChecks(ConsistencyCheck.ArcConsistency);
+		}
+		if(arguments.contains("ACP")){
+			solver.setPreprocessing(Preprocessing.ACP);
+		}
+		
+		solver.setValueSelectionHeuristic(ValueSelectionHeuristic.None);
+		solver.setVariableSelectionHeuristic(VariableSelectionHeuristic.None);
+	}
+	
 	public static void main(String[] args) {
 		if(args.length < 3){
 			System.err.println("Need atleast 3 arguments");
 			return;
 		}
-		List<String> arguments = Arrays.asList(args);
-
-		long totalStartTime = System.currentTimeMillis(); 
+		List<String> arguments = new ArrayList<String>();
+		for(String tag:args){
+			arguments.add(tag.toUpperCase());
+		}
 		
 		String inputFile = args[0]; 
 		String outputFile = args[1]; 
@@ -155,7 +174,7 @@ class main {
 		
 		SudokuFile sf = null;
 
-		if(args.length >= 4 && args[3].equals("GEN")){
+		if(args.length >= 4 && arguments.contains("GEN")){
 			sf = generateBoardFromFile(inputFile);
 		} else {
 			sf = SudokuBoardReader.readFile(inputFile); 
@@ -165,25 +184,8 @@ class main {
 		
 		BTSolver solver = new BTSolver(sf); 
 		
-		long ppStartTime = System.currentTimeMillis(); 
-		
-		solver.setConsistencyChecks(ConsistencyCheck.None);
-		if(arguments.contains("FC") || arguments.contains("fc")){
-			System.out.println("Forward Checking");
-			solver.setConsistencyChecks(ConsistencyCheck.ForwardChecking);
-		}
-		
-		if(arguments.contains("ACP") || arguments.contains("acp")){
-			System.out.println("Arc Consistency");
-			solver.setConsistencyChecks(ConsistencyCheck.ArcConsistency);
-		}
-		
-		solver.setValueSelectionHeuristic(ValueSelectionHeuristic.None);
-		solver.setVariableSelectionHeuristic(VariableSelectionHeuristic.None);
-		long ppEndTime = System.currentTimeMillis();
-		
-		long solverStartTime = System.currentTimeMillis(); 
-		
+		setSolverMethods(solver, arguments);
+
 		Thread t1 = new Thread(solver);
 		try
 		{
@@ -198,28 +200,23 @@ class main {
 		{
 		}
 		
-		long endTime = System.currentTimeMillis(); 
-		
-		System.out.println(Transpose(solver.getSolution()));
-
-
-		
+		System.out.println(solver.getSolution());
 		
 		try {
 		
 			File fileOut = new File(outputFile); 
-			PrintWriter outputWriter = new PrintWriter(outputFile); 
+			PrintWriter outputWriter = new PrintWriter(System.out); 
 			
-			outputWriter.println("TOTAL_START=" + totalStartTime / 1000.0); 
-			outputWriter.println("PREPROCESSING_START=" + ppStartTime / 1000.0);
-			outputWriter.println("PREPROCESSING_DONE=" + ppEndTime / 1000.0);
-			outputWriter.println("SEARCH_START=" + solverStartTime / 1000.0); 
-			outputWriter.println("SEARCH_DONE=" + endTime / 1000.0); 
+			outputWriter.println("TOTAL_START=" + solver.getStartTime() / 1000.0); 
+			outputWriter.println("PREPROCESSING_START=" + solver.getPPStartTime() / 1000.0);
+			outputWriter.println("PREPROCESSING_DONE=" + solver.getPPEndTime() / 1000.0);
+			outputWriter.println("SEARCH_START=" + solver.getStartTime() / 1000.0); 
+			outputWriter.println("SEARCH_DONE=" + solver.getEndTime() / 1000.0); 
 			//outputWriter.println("SOLUTION_TIME=" + ((ppEndTime - ppStartTime) + (endTime - solverStartTime)) );
-			outputWriter.println(printStatus(solver, ((ppEndTime - ppStartTime) + (endTime - solverStartTime)))); 
+			outputWriter.println(printStatus(solver, (solver.getPPTimeTaken() + solver.getTimeTaken()))); 
 			outputWriter.println("SOLUTION=" + printSolution(solver)); 
 			outputWriter.println("COUNT_NODES=" + solver.getNumAssignments()); 
-			outputWriter.println("COUNT_DEADENDS=" + solver.getNumBacktracks());
+			outputWriter.println("COUNT_DEADENDS=" + solver.getNumBacktracks());;
 			
 			outputWriter.close(); 
 			

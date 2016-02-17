@@ -2,9 +2,11 @@ package cspSolver;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 
 import sudoku.Converter;
 import sudoku.SudokuFile;
@@ -27,14 +29,23 @@ public class BTSolver implements Runnable{
 	private int numBacktracks;
 	private long startTime;
 	private long endTime;
+	
+	//Added
+	private long totalStartTime;
+	private long ppStartTime;
+	private long ppEndTime;
 
 	public enum VariableSelectionHeuristic 	{ None, MinimumRemainingValue, Degree };
 	public enum ValueSelectionHeuristic 		{ None, LeastConstrainingValue };
 	public enum ConsistencyCheck				{ None, ForwardChecking, ArcConsistency };
+	
+	//Added
+	public enum Preprocessing { None, ACP };
 
 	private VariableSelectionHeuristic varHeuristics;
 	private ValueSelectionHeuristic valHeuristics;
 	private ConsistencyCheck cChecks;
+	private Preprocessing preprocessing;
 	//===============================================================================
 	// Constructors
 	//===============================================================================
@@ -65,6 +76,11 @@ public class BTSolver implements Runnable{
 	{
 		this.cChecks = cc;
 	}
+	
+	public void setPreprocessing(Preprocessing p){
+		this.preprocessing = p;
+	}
+	
 	//===============================================================================
 	// Accessors
 	//===============================================================================
@@ -100,6 +116,30 @@ public class BTSolver implements Runnable{
 	{
 		return endTime-startTime;
 	}
+	
+	// Added
+	public long getTotalStartTime(){
+		return totalStartTime;
+	}
+	
+	public long getStartTime(){
+		return startTime;
+	}
+	
+	public long getEndTime(){
+		return endTime;
+	}
+	public long getPPStartTime(){
+		return ppStartTime;
+	}
+	
+	public long getPPEndTime(){
+		return ppEndTime;
+	}
+	
+	public long getPPTimeTaken(){
+		return ppEndTime - ppStartTime;
+	}
 
 	public int getNumAssignments()
 	{
@@ -133,7 +173,7 @@ public class BTSolver implements Runnable{
 		break;
 		case ForwardChecking: 	isConsistent = forwardChecking(v);
 		break;
-		case ArcConsistency: 	isConsistent = arcConsistency();
+		case ArcConsistency: 	isConsistent = arcConsistency(v);
 		break;
 		default: 				isConsistent = assignmentsCheck();
 		break;
@@ -186,9 +226,134 @@ public class BTSolver implements Runnable{
 	/**
 	 * TODO: Implement Maintaining Arc Consistency.
 	 */
-	private boolean arcConsistency()
+
+	
+	private boolean arcConsistency(Variable v)
 	{
-		return false;
+		int arc = 0;
+		// 0 == lecture slides 2x as slow as jonathan
+		// 1 == collin
+		// 2 = jonathan
+		
+		
+		if(arc == 0){
+			Queue<Variable[]> queue = new LinkedList<Variable[]>();
+			Set<Variable[]> set = new HashSet<Variable[]>();
+			for(Variable vOther : network.getNeighborsOfVariable(v)){
+				Variable[] pair = {vOther, v};
+				queue.add(pair);
+				set.add(pair);
+			}
+			
+			while(!queue.isEmpty()){
+				Variable[] pair = queue.remove();
+				set.remove(pair);
+				Variable v1 = pair[0];
+				Variable v2 = pair[1];
+				int oldSize = v1.size();
+				v1.removeValueFromDomain(v2.getAssignment());
+				if(v1.size() == 0) return false;
+				if(v1.size() > 1 || v1.size() == oldSize) continue;
+				List<Variable> neighbors = network.getNeighborsOfVariable(v1);
+				neighbors.remove(v2);
+				for(Variable k : neighbors){
+					Variable[] newPair = {k, v1};
+					if(!set.contains(newPair)){
+						queue.add(newPair);
+						set.add(newPair);
+					}
+				}
+			}
+		
+			return true;
+			}
+
+		if(arc == 1){
+		if(!forwardChecking(v)) return false;
+		
+		for (Variable aOther : network.getNeighborsOfVariable(v)){
+			Integer num;
+			if ((num = aOther.getAssignment()) != 0){
+				
+				for (Variable bOther : network.getNeighborsOfVariable(aOther)){
+					
+					bOther.removeValueFromDomain(num);
+					
+					if (bOther.size() == 0)
+						return false; 
+				}
+				
+			}
+			
+		}
+		
+		return true; 
+		
+		} else if (arc == 2){
+		
+		List<Constraint> constraints = null; 
+		Set<Variable> alreadyChecked = new HashSet<Variable>();
+		
+		while (!(constraints = network.getModifiedConstraints()).isEmpty()){
+			Set<Variable> unique = new HashSet<Variable>();
+			for(Constraint c : constraints){
+				for (Variable var : c.vars){
+					if(!unique.add(var) || alreadyChecked.contains(var)) continue;
+					if (var.isAssigned()){
+						alreadyChecked.add(var);
+						if(!forwardChecking(var)) return false;
+					}
+				}
+			}
+			
+		}
+		
+		return true; 
+		}
+		
+		System.out.println("Reached bottom of arc consistency");
+		return true;
+	}
+
+	/**
+	 * ACP
+	 */
+	
+	public boolean ACP(){
+		Queue<Variable[]> queue = new LinkedList<Variable[]>();
+		Set<Variable[]> set = new HashSet<Variable[]>();
+		
+		for(Variable v : network.getVariables()){
+			if(v.isAssigned()){
+				for(Variable vOther : network.getNeighborsOfVariable(v)){
+					Variable[] pair = {vOther, v};
+					queue.add(pair);
+					set.add(pair);
+				}
+			}
+		}
+		
+		while(!queue.isEmpty()){
+			Variable[] pair = queue.remove();
+			set.remove(pair);
+			Variable v1 = pair[0];
+			Variable v2 = pair[1];
+			int oldSize = v1.size();
+			v1.removeValueFromDomain(v2.getAssignment());
+			if(v1.size() == 0) return false;
+			if(v1.size() > 1 || v1.size() == oldSize) continue;
+			List<Variable> neighbors = network.getNeighborsOfVariable(v1);
+			neighbors.remove(v2);
+			for(Variable k : neighbors){
+				Variable[] newPair = {k, v1};
+				if(!set.contains(newPair)){
+					queue.add(newPair);
+					set.add(newPair);
+				}
+			}
+		}
+	
+		return true;
 	}
 
 	/**
@@ -305,14 +470,26 @@ public class BTSolver implements Runnable{
 	//===============================================================================
 	// Solver
 	//===============================================================================
-
+	
+	
 	/**
 	 * Method to start the solver
 	 */
 	public void solve()
 	{
+		
+		totalStartTime = System.currentTimeMillis();
+		ppStartTime = System.currentTimeMillis();
+		if(this.preprocessing == Preprocessing.ACP){
+			System.out.println("Preprocessing");
+			if(!ACP()) return;
+			System.out.println("After Preprocessing");
+			System.out.println(Converter.ConstraintNetworkToSudokuFile(network, sudokuGrid.getN(), sudokuGrid.getP(), sudokuGrid.getQ()));
+		}
+		ppEndTime = System.currentTimeMillis();
 		startTime = System.currentTimeMillis();
 		try {
+			
 			solve(0);
 		}catch (Exception e)
 		{
