@@ -173,6 +173,11 @@ class main {
 			solver.setConsistencyChecks(ConsistencyCheck.ForwardChecking);
 		}
 		
+		if(arguments.contains("ACP") || arguments.contains("acp")){
+			System.out.println("Arc Consistency");
+			solver.setConsistencyChecks(ConsistencyCheck.ArcConsistency);
+		}
+		
 		solver.setValueSelectionHeuristic(ValueSelectionHeuristic.None);
 		solver.setVariableSelectionHeuristic(VariableSelectionHeuristic.None);
 		long ppEndTime = System.currentTimeMillis();
@@ -203,7 +208,7 @@ class main {
 		try {
 		
 			File fileOut = new File(outputFile); 
-			PrintWriter outputWriter = new PrintWriter(System.out); 
+			PrintWriter outputWriter = new PrintWriter(outputFile); 
 			
 			outputWriter.println("TOTAL_START=" + totalStartTime / 1000.0); 
 			outputWriter.println("PREPROCESSING_START=" + ppStartTime / 1000.0);
