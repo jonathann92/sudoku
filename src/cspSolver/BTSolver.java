@@ -210,6 +210,19 @@ public class BTSolver implements Runnable{
 		}
 		return true;
 	}
+	
+	/**
+	 * PreProcess Forward Checking
+	 */
+	
+	private boolean ppForwardChecking(){
+		for(Variable v : network.getVariables()){
+			if(!forwardChecking(v))
+				return false;
+		}
+		
+		return true;
+	}
 
 	/**
 	 * TODO: Implement forward checking.
@@ -472,30 +485,44 @@ public class BTSolver implements Runnable{
 	//===============================================================================
 	
 	
+	private boolean preprocess(){
+		if(this.cChecks == ConsistencyCheck.ForwardChecking){
+			System.out.println("Preprocessing FC");
+			if(!ppForwardChecking()) return false;
+			System.out.println("After preprocessing FC");
+			System.out.println(Converter.ConstraintNetworkToSudokuFile(network, sudokuGrid.getN(), sudokuGrid.getP(), sudokuGrid.getQ()));
+		}
+		
+		if(this.preprocessing == Preprocessing.ACP){
+			System.out.println("Preprocessing ACP");
+			if(!ACP()) return false;
+			System.out.println("After Preprocessing ACP");
+			System.out.println(Converter.ConstraintNetworkToSudokuFile(network, sudokuGrid.getN(), sudokuGrid.getP(), sudokuGrid.getQ()));
+		}
+		
+		return true;
+	}
+	
 	/**
 	 * Method to start the solver
 	 */
 	public void solve()
-	{
-		
+	{		
 		totalStartTime = System.currentTimeMillis();
 		ppStartTime = System.currentTimeMillis();
-		if(this.preprocessing == Preprocessing.ACP){
-			System.out.println("Preprocessing");
-			if(!ACP()) return;
-			System.out.println("After Preprocessing");
-			System.out.println(Converter.ConstraintNetworkToSudokuFile(network, sudokuGrid.getN(), sudokuGrid.getP(), sudokuGrid.getQ()));
-		}
+		boolean pp = preprocess();
 		ppEndTime = System.currentTimeMillis();
 		startTime = System.currentTimeMillis();
+		
 		try {
-			
-			solve(0);
+			if(pp)
+				solve(0);
 		}catch (Exception e)
 		{
 			e.printStackTrace();
 			System.out.println("error with variable selection heuristic.");
 		}
+		
 		endTime = System.currentTimeMillis();
 		Trail.clearTrail();
 	}
