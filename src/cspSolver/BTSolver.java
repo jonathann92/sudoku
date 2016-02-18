@@ -140,6 +140,7 @@ public class BTSolver implements Runnable{
 	public long getPPTimeTaken(){
 		return ppEndTime - ppStartTime;
 	}
+	//
 
 	public int getNumAssignments()
 	{
@@ -217,7 +218,7 @@ public class BTSolver implements Runnable{
 	
 	private boolean ppForwardChecking(){
 		for(Variable v : network.getVariables()){
-			if(!forwardChecking(v))
+			if(v.isAssigned() && !forwardChecking(v))
 				return false;
 		}
 		
@@ -240,14 +241,12 @@ public class BTSolver implements Runnable{
 	 * TODO: Implement Maintaining Arc Consistency.
 	 */
 
-	
+	// A
 	private boolean arcConsistency(Variable v)
 	{
-		int arc = 0;
+		int arc = 1;
 		// 0 == lecture slides 2x as slow as jonathan
-		// 1 == collin
-		// 2 = jonathan
-		
+		// 1 = jonathan and colin
 		
 		if(arc == 0){
 			Queue<Variable[]> queue = new LinkedList<Variable[]>();
@@ -281,44 +280,20 @@ public class BTSolver implements Runnable{
 			return true;
 			}
 
-		if(arc == 1){
-		if(!forwardChecking(v)) return false;
-		
-		for (Variable aOther : network.getNeighborsOfVariable(v)){
-			Integer num;
-			if ((num = aOther.getAssignment()) != 0){
-				
-				for (Variable bOther : network.getNeighborsOfVariable(aOther)){
-					
-					bOther.removeValueFromDomain(num);
-					
-					if (bOther.size() == 0)
-						return false; 
-				}
-				
-			}
-			
-		}
-		
-		return true; 
-		
-		} else if (arc == 2){
+		else if (arc == 1){
 		
 		List<Constraint> constraints = null; 
-		Set<Variable> alreadyChecked = new HashSet<Variable>();
 		
 		while (!(constraints = network.getModifiedConstraints()).isEmpty()){
+			Set<Constraint> cSet = new HashSet<Constraint>(constraints);
 			Set<Variable> unique = new HashSet<Variable>();
-			for(Constraint c : constraints){
+			for(Constraint c : cSet){
 				for (Variable var : c.vars){
-					if(!unique.add(var) || alreadyChecked.contains(var)) continue;
-					if (var.isAssigned()){
-						alreadyChecked.add(var);
-						if(!forwardChecking(var)) return false;
-					}
+					if(!unique.add(var)) continue;
+					if (var.isAssigned() && !forwardChecking(var))
+						return false;
 				}
-			}
-			
+			}	
 		}
 		
 		return true; 
@@ -330,9 +305,32 @@ public class BTSolver implements Runnable{
 
 	/**
 	 * ACP
+	 * PreProcessing for Arc Consistency
 	 */
 	
 	public boolean ACP(){
+		for(Variable v : network.getVariables()){
+			if(v.isAssigned()){
+				v.setModified(true);
+			}
+		}
+		
+		List<Constraint> constraints = null; 
+		
+		while (!(constraints = network.getModifiedConstraints()).isEmpty()){
+			Set<Constraint> cSet = new HashSet<Constraint>(constraints);
+			Set<Variable> unique = new HashSet<Variable>();
+			for(Constraint c : cSet){
+				for (Variable var : c.vars){
+					if(!unique.add(var)) continue;
+					if (var.isAssigned() && !forwardChecking(var))
+						return false;
+				}
+			}	
+		}
+		
+		return true; 		
+		/*
 		Queue<Variable[]> queue = new LinkedList<Variable[]>();
 		Set<Variable[]> set = new HashSet<Variable[]>();
 		
@@ -367,6 +365,7 @@ public class BTSolver implements Runnable{
 		}
 	
 		return true;
+		*/
 	}
 
 	/**

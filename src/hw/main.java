@@ -73,43 +73,7 @@ class main {
 		}
 		
 	}
-	
-	private static String Transpose(SudokuFile sf){
-		int N = sf.getN(), p = sf.getP(), q = sf.getQ();
-		int board[][] = sf.getBoard();
-		StringBuilder sb = new StringBuilder();
-		sb.append("N: ");
-		sb.append(N);
-		sb.append("\tP: ");
-		sb.append(p);
-		sb.append("\tQ: ");
-		sb.append(q);
-		sb.append("\n");
 		
-		
-		for(int i = 0; i < N; i ++)
-		{
-			for(int j = 0; j < N; j++)
-			{
-				sb.append(Odometer.intToOdometer(board[j][i]) + " ");
-				if((j+1)%q==0 && j!= 0 && j != N-1)
-				{
-					sb.append("| ");
-				}
-			}
-			sb.append("\n");
-			if((i+1)%p == 0 && i != 0 && i != N-1)
-			{
-				for(int k = 0; k < N+p-1;k++)
-				{
-					sb.append("- ");
-				}
-				sb.append("\n");
-			}
-		}
-		return sb.toString();
-	}
-	
 	private static SudokuFile generateBoardFromFile(String input){
 		System.out.println("Generating board from file");
 		BufferedReader br = null;
@@ -141,7 +105,10 @@ class main {
 	}
 	
 	public static void setSolverMethods(BTSolver solver, List<String> arguments){
+		solver.setValueSelectionHeuristic(ValueSelectionHeuristic.None);
+		solver.setVariableSelectionHeuristic(VariableSelectionHeuristic.None);
 		solver.setConsistencyChecks(ConsistencyCheck.None);
+		
 		if(arguments.contains("FC")){
 			System.out.println("Forward Checking");
 			solver.setConsistencyChecks(ConsistencyCheck.ForwardChecking);
@@ -154,8 +121,7 @@ class main {
 			solver.setPreprocessing(Preprocessing.ACP);
 		}
 		
-		solver.setValueSelectionHeuristic(ValueSelectionHeuristic.None);
-		solver.setVariableSelectionHeuristic(VariableSelectionHeuristic.None);
+		
 	}
 	
 	public static void main(String[] args) {
