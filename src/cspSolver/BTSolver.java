@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
+import cspSolver.BTSolver.ConsistencyCheck;
 import sudoku.Converter;
 import sudoku.SudokuFile;
 /**
@@ -40,12 +41,11 @@ public class BTSolver implements Runnable{
 	public enum ConsistencyCheck				{ None, ForwardChecking, ArcConsistency };
 	
 	//Added
-	public enum Preprocessing { None, ACP };
+	public List<String> preprocessFlags = null;
 
 	private VariableSelectionHeuristic varHeuristics;
 	private ValueSelectionHeuristic valHeuristics;
 	private ConsistencyCheck cChecks;
-	private Preprocessing preprocessing;
 	//===============================================================================
 	// Constructors
 	//===============================================================================
@@ -56,6 +56,7 @@ public class BTSolver implements Runnable{
 		this.sudokuGrid = sf;
 		numAssignments = 0;
 		numBacktracks = 0;
+		this.preprocessFlags = new ArrayList<String>();
 	}
 
 	//===============================================================================
@@ -76,10 +77,7 @@ public class BTSolver implements Runnable{
 	{
 		this.cChecks = cc;
 	}
-	
-	public void setPreprocessing(Preprocessing p){
-		this.preprocessing = p;
-	}
+
 	
 	//===============================================================================
 	// Accessors
@@ -485,14 +483,15 @@ public class BTSolver implements Runnable{
 	
 	
 	private boolean preprocess(){
-		if(this.cChecks == ConsistencyCheck.ForwardChecking){
+		if(this.preprocessFlags.contains("FC")){
+			
 			System.out.println("Preprocessing FC");
 			if(!ppForwardChecking()) return false;
 			System.out.println("After preprocessing FC");
 			System.out.println(Converter.ConstraintNetworkToSudokuFile(network, sudokuGrid.getN(), sudokuGrid.getP(), sudokuGrid.getQ()));
-		}
+		} 
 		
-		if(this.preprocessing == Preprocessing.ACP){
+		if(this.preprocessFlags.contains("ACP")){
 			System.out.println("Preprocessing ACP");
 			if(!ACP()) return false;
 			System.out.println("After Preprocessing ACP");

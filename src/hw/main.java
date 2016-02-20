@@ -1,12 +1,20 @@
 package hw;
 
+/*
+ * Finished:
+ * 	FC
+ * 	MAC
+ * 	ACP
+ * 
+ * 	
+ */
+
 import sudoku.SudokuBoardGenerator;
 import sudoku.SudokuFile; 
 import sudoku.Odometer; 
 import sudoku.Converter; 
 import sudoku.SudokuBoardReader; 
 import cspSolver.BTSolver.ConsistencyCheck;
-import cspSolver.BTSolver.Preprocessing;
 import cspSolver.BTSolver.ValueSelectionHeuristic;
 import cspSolver.BTSolver.VariableSelectionHeuristic;
 import java.util.*;
@@ -112,13 +120,14 @@ class main {
 		if(arguments.contains("FC")){
 			System.out.println("Forward Checking");
 			solver.setConsistencyChecks(ConsistencyCheck.ForwardChecking);
+			solver.preprocessFlags.add("FC");
 		}
 		if(arguments.contains("MAC")){
-			System.out.println("Arc Consistency");
+			System.out.println("Maintaining Arc Consistency");
 			solver.setConsistencyChecks(ConsistencyCheck.ArcConsistency);
 		}
 		if(arguments.contains("ACP")){
-			solver.setPreprocessing(Preprocessing.ACP);
+			solver.preprocessFlags.add("ACP");
 		}
 		
 		
