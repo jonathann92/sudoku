@@ -36,7 +36,7 @@ public class BTSolver implements Runnable{
 	private long ppStartTime;
 	private long ppEndTime;
 
-	public enum VariableSelectionHeuristic 	{ None, MinimumRemainingValue, Degree };
+	public enum VariableSelectionHeuristic 	{ None, MinimumRemainingValue, Degree, MRVDH };
 	public enum ValueSelectionHeuristic 		{ None, LeastConstrainingValue };
 	public enum ConsistencyCheck				{ None, ForwardChecking, ArcConsistency };
 	
@@ -381,6 +381,8 @@ public class BTSolver implements Runnable{
 		break;
 		case Degree:				next = getDegree();
 		break;
+		case MRVDH:					next = getMRVDH();
+		break;
 		default:					next = getfirstUnassignedVariable();
 		break;
 		}
@@ -409,7 +411,17 @@ public class BTSolver implements Runnable{
 	 */
 	private Variable getMRV()
 	{
-		return null;
+		Variable next = null;
+		int min = Integer.MAX_VALUE;
+		
+		for(Variable v : network.getVariables()){
+			if(!v.isAssigned() && v.size() < min){
+				min = v.size();
+				next = v;
+			}
+		}
+			
+		return next;
 	}
 
 	/**
@@ -418,7 +430,61 @@ public class BTSolver implements Runnable{
 	 */
 	private Variable getDegree()
 	{
-		return null;
+
+		Variable next = null;
+		int max = -1;
+		
+		for(Variable v : network.getVariables()){
+			if(v.isAssigned()) continue;
+			int count = 0;
+			for(Variable neighbor : network.getNeighborsOfVariable(v)){
+				if(!neighbor.isAssigned())
+					++count;
+			}
+			if(count > max){
+				next = v;
+				max = count;
+			}
+		}
+		
+		return next;
+	}
+	
+	private Variable getMRVDH(){
+		Variable next = null;
+		List<Variable> ties = new ArrayList<Variable>();
+		int min = Integer.MAX_VALUE;
+		
+		// MRV Part
+		for(Variable v : network.getVariables()){
+			if(!v.isAssigned()){
+				if(v.size() == min){
+					ties.add(v);
+				} else if (v.size() < min){
+					ties.clear();
+					ties.add(v);
+					min = v.size();
+				}
+			}
+		}
+		
+		// DH part
+		int max = -1;
+		
+		for(Variable v : ties){
+			int count = 0;
+			for(Variable neighbor : network.getNeighborsOfVariable(v)){
+				if(!v.isAssigned()){
+					++count;
+				}
+			}
+			if(count > max){
+				next = v;
+				max = count;
+			}
+		}
+		
+		return next;
 	}
 
 	/**
@@ -466,7 +532,33 @@ public class BTSolver implements Runnable{
 	 */
 	public List<Integer> getValuesLCVOrder(Variable v)
 	{
-		return null;
+		ArrayList<Integer[]> values = new ArrayList<Integer[]>();
+		
+		for(Integer value : v.getDomain().getValues()){
+			int count = 0;
+			for(Variable neighbor: network.getNeighborsOfVariable(v)){
+				if(neighbor.getDomain().contains(value))
+					++count;
+			}
+			Integer[] current = {value, count};
+			values.add(current);
+		}
+		
+		Comparator<Integer[]> valueComparator = new Comparator<Integer[]>(){
+
+			@Override
+			public int compare(Integer[] i1, Integer[] i2) {
+				return i1[1] - i2[1];
+			}
+		};
+		Collections.sort(values, valueComparator);
+		
+		List<Integer> nextValues = new ArrayList<Integer>();
+		for(Integer[] i : values){
+			nextValues.add(i[0]);
+		}
+		
+		return nextValues;
 	}
 	/**
 	 * Called when solver finds a solution

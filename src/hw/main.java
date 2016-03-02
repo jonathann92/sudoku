@@ -11,8 +11,6 @@ package hw;
 
 import sudoku.SudokuBoardGenerator;
 import sudoku.SudokuFile; 
-import sudoku.Odometer; 
-import sudoku.Converter; 
 import sudoku.SudokuBoardReader; 
 import cspSolver.BTSolver.ConsistencyCheck;
 import cspSolver.BTSolver.ValueSelectionHeuristic;
@@ -26,7 +24,7 @@ class main {
 	
 	private static String printSolution(BTSolver solver){
 		
-		String solution = "("; 
+		String solution = "(";
 		int length = solver.getSolution().getN(); 
 		
 		if (solver.hasSolution()){
@@ -42,7 +40,6 @@ class main {
 				}
 				
 			}
-			
 			return solution.substring(0, solution.length() - 1).concat(")"); 
 			
 		}
@@ -117,6 +114,8 @@ class main {
 		solver.setVariableSelectionHeuristic(VariableSelectionHeuristic.None);
 		solver.setConsistencyChecks(ConsistencyCheck.None);
 		
+		
+		// FC MAC ACP
 		if(arguments.contains("FC")){
 			System.out.println("Forward Checking");
 			solver.setConsistencyChecks(ConsistencyCheck.ForwardChecking);
@@ -129,6 +128,26 @@ class main {
 		if(arguments.contains("ACP")){
 			solver.preprocessFlags.add("ACP");
 		}
+		
+		// MRV DH
+		if(arguments.contains("MRV") && arguments.contains("DH")){
+			System.out.println("MRVDH");
+			solver.setVariableSelectionHeuristic(VariableSelectionHeuristic.MRVDH);
+		}
+		else if (arguments.contains("MRV")){
+			System.out.println("MRV");
+			solver.setVariableSelectionHeuristic(VariableSelectionHeuristic.MinimumRemainingValue);
+		}
+		else if (arguments.contains("DH")){
+			System.out.println("DH");
+			solver.setVariableSelectionHeuristic(VariableSelectionHeuristic.Degree);
+		}
+		
+		if(arguments.contains("LCV")){
+			System.out.println("LCV");
+			solver.setValueSelectionHeuristic(ValueSelectionHeuristic.LeastConstrainingValue);
+		}
+		
 		
 		
 	}
@@ -146,9 +165,13 @@ class main {
 		String inputFile = args[0]; 
 		String outputFile = args[1]; 
 		int timeOut = Integer.parseInt(args[2]); 
-		
 		SudokuFile sf = null;
-
+		
+		boolean validFile = false;
+		if((new File(inputFile).exists())){
+			validFile = true;
+		}
+		
 		if(args.length >= 4 && arguments.contains("GEN")){
 			sf = generateBoardFromFile(inputFile);
 		} else {
@@ -180,18 +203,31 @@ class main {
 		try {
 		
 			File fileOut = new File(outputFile); 
-			PrintWriter outputWriter = new PrintWriter(System.out); 
+			PrintWriter outputWriter = new PrintWriter(fileOut); 
 			
-			outputWriter.println("TOTAL_START=" + solver.getStartTime() / 1000.0); 
-			outputWriter.println("PREPROCESSING_START=" + solver.getPPStartTime() / 1000.0);
-			outputWriter.println("PREPROCESSING_DONE=" + solver.getPPEndTime() / 1000.0);
-			outputWriter.println("SEARCH_START=" + solver.getStartTime() / 1000.0); 
-			outputWriter.println("SEARCH_DONE=" + solver.getEndTime() / 1000.0); 
-			//outputWriter.println("SOLUTION_TIME=" + ((ppEndTime - ppStartTime) + (endTime - solverStartTime)) );
-			outputWriter.println(printStatus(solver, (solver.getPPTimeTaken() + solver.getTimeTaken()))); 
-			outputWriter.println("SOLUTION=" + printSolution(solver)); 
-			outputWriter.println("COUNT_NODES=" + solver.getNumAssignments()); 
-			outputWriter.println("COUNT_DEADENDS=" + solver.getNumBacktracks());;
+			if(validFile){
+				outputWriter.println("TOTAL_START=" + solver.getStartTime() / 1000.0); 
+				outputWriter.println("PREPROCESSING_START=" + solver.getPPStartTime() / 1000.0);
+				outputWriter.println("PREPROCESSING_DONE=" + solver.getPPEndTime() / 1000.0);
+				outputWriter.println("SEARCH_START=" + solver.getStartTime() / 1000.0); 
+				outputWriter.println("SEARCH_DONE=" + solver.getEndTime() / 1000.0); 
+				outputWriter.println(printStatus(solver, (solver.getPPTimeTaken() + solver.getTimeTaken()))); 
+				outputWriter.println("SOLUTION=" + printSolution(solver)); 
+				outputWriter.println("COUNT_NODES=" + solver.getNumAssignments()); 
+				outputWriter.println("COUNT_DEADENDS=" + solver.getNumBacktracks());
+			} else{
+				outputWriter.println("TOTAL_START=" + 0.0); 
+				outputWriter.println("PREPROCESSING_START=" + 0.0);
+				outputWriter.println("PREPROCESSING_DONE=" + 0.0);
+				outputWriter.println("SEARCH_START=" + 0.0); 
+				outputWriter.println("SEARCH_DONE=" + 0.0); 
+				outputWriter.println("STATUS=invalidFile"); 
+				outputWriter.println("SOLUTION=()"); 
+				outputWriter.println("COUNT_NODES=" + 0.0); 
+				outputWriter.println("COUNT_DEADENDS=" + 0.0);
+				System.out.println(inputFile + "Does not exist");
+			}
+			
 			
 			outputWriter.close(); 
 			
