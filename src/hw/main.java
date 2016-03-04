@@ -203,7 +203,7 @@ class main {
 		try {
 		
 			File fileOut = new File(outputFile); 
-			PrintWriter outputWriter = new PrintWriter(fileOut); 
+			PrintWriter outputWriter = new PrintWriter(System.out); 
 			
 			if(validFile){
 				outputWriter.println("TOTAL_START=" + solver.getStartTime() / 1000.0); 

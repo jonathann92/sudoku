@@ -579,15 +579,15 @@ public class BTSolver implements Runnable{
 			
 			System.out.println("Preprocessing FC");
 			if(!ppForwardChecking()) return false;
-			System.out.println("After preprocessing FC");
-			System.out.println(Converter.ConstraintNetworkToSudokuFile(network, sudokuGrid.getN(), sudokuGrid.getP(), sudokuGrid.getQ()));
+			//System.out.println("After preprocessing FC");
+			//System.out.println(Converter.ConstraintNetworkToSudokuFile(network, sudokuGrid.getN(), sudokuGrid.getP(), sudokuGrid.getQ()));
 		} 
 		
 		if(this.preprocessFlags.contains("ACP")){
 			System.out.println("Preprocessing ACP");
 			if(!ACP()) return false;
-			System.out.println("After Preprocessing ACP");
-			System.out.println(Converter.ConstraintNetworkToSudokuFile(network, sudokuGrid.getN(), sudokuGrid.getP(), sudokuGrid.getQ()));
+			//System.out.println("After Preprocessing ACP");
+			//System.out.println(Converter.ConstraintNetworkToSudokuFile(network, sudokuGrid.getN(), sudokuGrid.getP(), sudokuGrid.getQ()));
 		}
 		
 		return true;
