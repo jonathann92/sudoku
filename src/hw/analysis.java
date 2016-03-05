@@ -54,11 +54,11 @@ public class analysis {
 			solver.setValueSelectionHeuristic(ValueSelectionHeuristic.LeastConstrainingValue);
 		}
 		
-		System.out.println(arguments);
+		
 	}
 	
 	public static List<String> arguments(int number){
-		ArrayList<Character> binary = new ArrayList<Character>(Arrays.asList('0','0','0','0','0','0'));
+		ArrayList<Character> binary = new ArrayList<Character>(Arrays.asList('0','0','0','0','0'));
 		String values = Integer.toBinaryString(number);
 		for(int i = values.length()-1, j = binary.size() - 1; i >=0 ; --i, --j){
 			binary.set(j, values.charAt(i));
@@ -68,7 +68,24 @@ public class analysis {
 		System.out.println(binary);
 		List<String> args = new ArrayList<String>();
 		
-		if(binary.get(0) == '0')
+		// This is to have FC always in there
+		args.add("FC");
+		if(binary.get(0) == '1')
+			args.add("LCV");
+		if(binary.get(1) == '1')
+			args.add("MAC");
+		if(binary.get(2) == '1')
+			args.add("ACP");
+		if(binary.get(3) == '1')
+			args.add("MRV");
+		if(binary.get(4) == '1')
+			args.add("DH");
+		
+		/* 
+		 * This is to include FC in switch
+		 * 
+		 * 
+		if(binary.get(0) == '1')
 			args.add("FC");
 		if(binary.get(1) == '1')
 			args.add("MAC");
@@ -80,12 +97,14 @@ public class analysis {
 			args.add("DH");
 		if(binary.get(5) == '1')
 			args.add("LCV");
-
+		*/
+		
+		System.out.println(args);
 		return args;
 	}
 
 	public static void main(String[] args) {
-		int timeout = 10;
+		long timeout = 5 * 1000;
 		
 //		int P = 3;
 //		int Q = 3;
@@ -94,7 +113,7 @@ public class analysis {
 //		int R = M / (N*N); 
 //		SudokuFile sf = SudokuBoardGenerator.generateBoard(N, P, Q, M);		
 		
-		String input = "ExampleSudokuFiles/PH1.txt";
+		String input = "ExampleSudokuFiles/PH3.txt";
 		SudokuFile sf = SudokuBoardReader.readFile(input);		
 		
 		System.out.println(sf);
@@ -102,10 +121,10 @@ public class analysis {
 		
 		
 		// Figure out best combination of flags
-		List<Double> times = new ArrayList<Double>();
+		List<Long> times = new ArrayList<Long>();
 		List<List<String>> arguments = new ArrayList<List<String>>();
 
-		for(int i = 0; i < 64; ++i){
+		for(int i = 0; i < 32; ++i){
 			BTSolver solver = new BTSolver(sf);
 			List<String> flags = arguments(i);
 			heuristics(solver, flags);
@@ -113,9 +132,9 @@ public class analysis {
 			Thread t1 = new Thread(solver);
 			try{
 				t1.start();
-				t1.join(timeout * 1000);
+				t1.join(timeout);
 				if(t1.isAlive()){
-					System.out.println(timeout + " Seconds have passed, killing thread");
+					System.out.println((timeout / 1000.0) + " Seconds have passed, killing thread");
 					t1.interrupt();
 				}
 			} catch(InterruptedException e){ }
@@ -125,15 +144,27 @@ public class analysis {
 				long time = solver.getPPTimeTaken() + solver.getTimeTaken();
 				
 				System.out.println("TOTAL TIME: " + time / 1000.0);
-				times.add(time / 1000.0);
+				timeout = time+1000;
+				
+				times.add(time);
 				arguments.add(flags);
 
 			}
 			System.out.println("\n*********************\n");
 		}
 		
+		long bestTime = Long.MAX_VALUE;
+		List<String> bestFlags = null;
 		
+		for(int i = 0; i < times.size(); ++i){
+			if(times.get(i) < bestTime){
+				bestFlags = arguments.get(i);
+				bestTime = times.get(i);
+			}
+		}
 		
+		System.out.println("Best flags are: " + bestFlags);
+		System.out.println("Best time is: " + bestTime);
 		
 
 	}

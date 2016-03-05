@@ -242,7 +242,7 @@ public class BTSolver implements Runnable{
 	// A
 	private boolean arcConsistency(Variable v)
 	{
-		int arc = 1;
+		int arc = 0;
 		// 0 == lecture slides 2x as slow as jonathan
 		// 1 = jonathan and colin
 		
