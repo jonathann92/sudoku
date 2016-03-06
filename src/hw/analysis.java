@@ -14,6 +14,85 @@ import sudoku.SudokuFile;
 
 public class analysis {
 	
+	public static void main(String[] args) {
+		if(args.length < 1){
+			System.err.println("Need atleast 1 flag (FC MRV DH LCV MAC ACP)");
+			//return;
+		}
+		
+		List<String> arguments = new ArrayList<String>();
+		for(String tag:args){
+			arguments.add(tag.toUpperCase());
+		}
+		
+		// Find the bestFlags
+		//bestFlags();
+		
+		// Part 2 timing the flags
+		statistics(arguments);
+		
+	}
+
+
+	public static void statistics(List<String> flags) {
+		long timeout = 30 * 1000;
+		
+		// Comment out which flags you want to include
+//		List<String> flags = new ArrayList<String>();
+//		flags.add("FC");
+//////		flags.add("MAC");
+//////		flags.add("ACP");
+//		flags.add("MRV");
+//		flags.add("DH");
+//		flags.add("LCV");
+		
+		System.out.println(flags);
+
+		
+		long nodes = 0;
+		
+		List<Long> times = new ArrayList<Long>();
+		long totalTime = 0;
+		
+		for(int i = 1; i <= 5; ++i){
+			String file = "ExampleSudokuFiles/PM" + i + ".txt";
+			System.out.println(file);
+			SudokuFile sf = SudokuBoardReader.readFile(file);
+			BTSolver solver = new BTSolver(sf);
+			
+			heuristics(solver, flags);
+			
+			Thread t1 = new Thread(solver);
+			t1.start();
+			try {
+				t1.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			times.add(solver.getTotalTime());
+			totalTime += solver.getTotalTime();
+			nodes += solver.getNumAssignments();
+			System.out.println("TIME: " + solver.getTotalTime());
+			System.out.println("NODES: " + solver.getNumAssignments() + "\n\n");
+		}
+		
+		double avgTime = totalTime / 5.0;
+		
+		double std = 0.0;
+		for(Long xi : times){
+			std += ( (xi - avgTime) * (xi - avgTime) );
+		}
+		
+		std /= 5.0;
+		std = Math.sqrt(std);
+		
+		System.out.println("avg # nodes: " + nodes / 5.0);
+		System.out.println("avg time: " + avgTime);
+		System.out.println("STD Dev Time: " + std);
+	}
+	
 	public static void heuristics(BTSolver solver, List<String> arguments){
 		
 		solver.setValueSelectionHeuristic(ValueSelectionHeuristic.None);
@@ -70,15 +149,15 @@ public class analysis {
 		
 		// This is to have FC always in there
 		args.add("FC");
-		if(binary.get(0) == '1')
+		if(binary.get(0) == '0')
 			args.add("LCV");
-		if(binary.get(1) == '1')
+		if(binary.get(1) == '0')
 			args.add("MAC");
-		if(binary.get(2) == '1')
+		if(binary.get(2) == '0')
 			args.add("ACP");
-		if(binary.get(3) == '1')
+		if(binary.get(3) == '0')
 			args.add("MRV");
-		if(binary.get(4) == '1')
+		if(binary.get(4) == '0')
 			args.add("DH");
 		
 		/* 
@@ -103,8 +182,8 @@ public class analysis {
 		return args;
 	}
 
-	public static void main(String[] args) {
-		long timeout = 5 * 1000;
+	private static void bestFlags() {
+		long timeout =  Long.MAX_VALUE;
 		
 //		int P = 3;
 //		int Q = 3;
@@ -113,7 +192,7 @@ public class analysis {
 //		int R = M / (N*N); 
 //		SudokuFile sf = SudokuBoardGenerator.generateBoard(N, P, Q, M);		
 		
-		String input = "ExampleSudokuFiles/PH3.txt";
+		String input = "ExampleSudokuFiles/PH5.txt";
 		SudokuFile sf = SudokuBoardReader.readFile(input);		
 		
 		System.out.println(sf);
@@ -165,8 +244,6 @@ public class analysis {
 		
 		System.out.println("Best flags are: " + bestFlags);
 		System.out.println("Best time is: " + bestTime);
-		
-
 	}
 
 }

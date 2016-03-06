@@ -138,6 +138,10 @@ public class BTSolver implements Runnable{
 	public long getPPTimeTaken(){
 		return ppEndTime - ppStartTime;
 	}
+	
+	public long getTotalTime(){
+		return endTime - totalStartTime;
+	}
 	//
 
 	public int getNumAssignments()
@@ -242,7 +246,7 @@ public class BTSolver implements Runnable{
 	// A
 	private boolean arcConsistency(Variable v)
 	{
-		int arc = 0;
+		int arc = 1;
 		// 0 == lecture slides 2x as slow as jonathan
 		// 1 = jonathan and colin
 		
