@@ -37,15 +37,6 @@ public class analysis {
 	public static void statistics(List<String> flags) {
 		long timeout = 30 * 1000;
 		
-		// Comment out which flags you want to include
-//		List<String> flags = new ArrayList<String>();
-//		flags.add("FC");
-//////		flags.add("MAC");
-//////		flags.add("ACP");
-//		flags.add("MRV");
-//		flags.add("DH");
-//		flags.add("LCV");
-		
 		System.out.println(flags);
 
 		
@@ -160,39 +151,14 @@ public class analysis {
 		if(binary.get(4) == '0')
 			args.add("DH");
 		
-		/* 
-		 * This is to include FC in switch
-		 * 
-		 * 
-		if(binary.get(0) == '1')
-			args.add("FC");
-		if(binary.get(1) == '1')
-			args.add("MAC");
-		if(binary.get(2) == '1')
-			args.add("ACP");
-		if(binary.get(3) == '1')
-			args.add("MRV");
-		if(binary.get(4) == '1')
-			args.add("DH");
-		if(binary.get(5) == '1')
-			args.add("LCV");
-		*/
-		
 		System.out.println(args);
 		return args;
 	}
 
 	private static void bestFlags() {
-		long timeout =  Long.MAX_VALUE;
+		long timeout =  Long.MAX_VALUE;		
 		
-//		int P = 3;
-//		int Q = 3;
-//		int N = P * Q;
-//		int M = 12;
-//		int R = M / (N*N); 
-//		SudokuFile sf = SudokuBoardGenerator.generateBoard(N, P, Q, M);		
-		
-		String input = "ExampleSudokuFiles/PH5.txt";
+		String input = "ExampleSudokuFiles/PM2.txt";
 		SudokuFile sf = SudokuBoardReader.readFile(input);		
 		
 		System.out.println(sf);
@@ -223,7 +189,7 @@ public class analysis {
 				long time = solver.getPPTimeTaken() + solver.getTimeTaken();
 				
 				System.out.println("TOTAL TIME: " + time / 1000.0);
-				timeout = time+1000;
+				timeout = time+10000;
 				
 				times.add(time);
 				arguments.add(flags);
