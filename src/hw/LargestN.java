@@ -47,7 +47,6 @@ public class LargestN {
 			for(int j = 0; j < threadNum; ++j){
 				SudokuFile sf = SudokuBoardGenerator.generateBoard(n,p,q, m); // Number of Assignments
 				
-				System.out.println("Problem board: \n" + sf);
 				
 				
 				BTSolver solver = new BTSolver(sf); 
@@ -73,7 +72,6 @@ public class LargestN {
 			
 			for(int j = 0; j < threadNum; ++j) {
 				long time = (end - System.currentTimeMillis());
-				System.out.println(time);
 				
 				try {
 					thread[j].join(Math.max(1,  time));
@@ -87,7 +85,6 @@ public class LargestN {
 				}
 				
 				BTSolver solver = btsolver[j];
-				System.out.println("Solver Board \n" + solver.getSolution());
 				
 				if(solver.hasSolution()){	
 					timeCount.add(((solver.getPPTimeTaken() + solver.getTimeTaken()) / 1000.0));
