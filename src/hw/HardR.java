@@ -65,7 +65,6 @@ public class HardR {
 			}
 			
 			for(int i = 0; i < iter; ++i){
-				System.out.println("Joining " + i);
 				try {
 					thread[i].join(1);
 					if(thread[i].isAlive()){
