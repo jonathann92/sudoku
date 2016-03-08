@@ -620,6 +620,7 @@ public class BTSolver implements Runnable{
 		endTime = System.currentTimeMillis();
 		for(Variable v : network.getVariables()){
 			v.clearTrail();
+			break;
 		}
 	}
 

@@ -19,7 +19,7 @@ public class HardR {
 		int hardestR = -1; 
 		double longestTime = Double.MIN_VALUE; 
 		
-		Integer[] M_Values = {4, 8, 12, 16, 17, 18, 19, 20, 21, 22, 24, 28, 32, 36}; 
+		Integer[] M_Values = {1, 2, 4, 8, 12, 16, 17, 18, 19, 20, 21, 22, 24, 28, 32, 36}; 
 		
 		for (int M = 0; M < M_Values.length; M++){
 			System.out.println("M-Value: " + M_Values[M]);
@@ -27,7 +27,7 @@ public class HardR {
 			ArrayList<Double> timeCount = new ArrayList<Double>();
 			ArrayList<Integer> nodeCount = new ArrayList<Integer>(); 
 			int numberOfFailures = 0; 
-			int iter = 50;
+			int iter = 200;
 			int totalLoops = 0; 
 			
 			Thread[] thread = new Thread[iter];
@@ -52,21 +52,24 @@ public class HardR {
 				solver.preprocessFlags.add("ACP");
 				solver.preprocessFlags.add("FC");
 				
-				
-				long timeout = 1 * 10000;
 				btsolver[i] = solver;
 				thread[i] = new Thread(solver);
 				thread[i].start();
 			}
 			
+			try {
+				Thread.sleep(60 * 1000);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
 			for(int i = 0; i < iter; ++i){
-				boolean add = true;
 				System.out.println("Joining " + i);
 				try {
-					thread[i].join(60 * 1000);
+					thread[i].join(1);
 					if(thread[i].isAlive()){
 						thread[i].interrupt();
-						add = false;
 					}
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
@@ -76,7 +79,7 @@ public class HardR {
 				BTSolver solver = btsolver[i];
 				
 			
-				if(add){			
+				if(!thread[i].isInterrupted()){			
 					timeCount.add(((solver.getPPTimeTaken() + solver.getTimeTaken()) / 1000.0));
 					nodeCount.add(solver.getNumAssignments());
 				}
