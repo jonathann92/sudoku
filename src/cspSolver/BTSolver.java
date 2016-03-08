@@ -22,7 +22,7 @@ public class BTSolver implements Runnable{
 	//===============================================================================
 
 	private ConstraintNetwork network;
-	private static Trail trail = Trail.getTrail();
+	//private static Trail trail = Trail.getTrail();
 	private boolean hasSolution = false;
 	private SudokuFile sudokuGrid;
 
@@ -618,7 +618,9 @@ public class BTSolver implements Runnable{
 		}
 		
 		endTime = System.currentTimeMillis();
-		Trail.clearTrail();
+		for(Variable v : network.getVariables()){
+			v.clearTrail();
+		}
 	}
 
 	/**
@@ -664,7 +666,7 @@ public class BTSolver implements Runnable{
 
 			for(Integer i : getNextValues(v))
 			{
-				trail.placeBreadCrumb();
+				v.trail.placeBreadCrumb();
 
 				//check a value
 				v.updateDomain(new Domain(i));
@@ -680,7 +682,7 @@ public class BTSolver implements Runnable{
 				//if this assignment failed at any stage, backtrack
 				if(!hasSolution)
 				{
-					trail.undo();
+					v.trail.undo();
 					numBacktracks++;
 				} else {
 					return;
@@ -691,6 +693,12 @@ public class BTSolver implements Runnable{
 
 	@Override
 	public void run() {
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		solve();
 	}
 }

@@ -27,9 +27,13 @@ public class HardR {
 			ArrayList<Double> timeCount = new ArrayList<Double>();
 			ArrayList<Integer> nodeCount = new ArrayList<Integer>(); 
 			int numberOfFailures = 0; 
+			int iter = 50;
 			int totalLoops = 0; 
 			
-			for (int i = 0; i < 25; i++){ // Change this line if you want to change the number of loops
+			Thread[] thread = new Thread[iter];
+			BTSolver[] btsolver = new BTSolver[iter];
+			
+			for (int i = 0; i < iter; i++){ // Change this line if you want to change the number of loops
 				
 				totalLoops++; 
 				
@@ -48,15 +52,34 @@ public class HardR {
 				solver.preprocessFlags.add("ACP");
 				solver.preprocessFlags.add("FC");
 				
-				long timeout = 1 * 10000;
-				Thread t1 = new Thread(solver);
-				try{
-					t1.start();
-					t1.join();
-				} catch(InterruptedException e){ }
 				
-				timeCount.add(((solver.getPPTimeTaken() + solver.getTimeTaken()) / 1000.0));
-				nodeCount.add(solver.getNumAssignments());
+				long timeout = 1 * 10000;
+				btsolver[i] = solver;
+				thread[i] = new Thread(solver);
+				thread[i].start();
+			}
+			
+			for(int i = 0; i < iter; ++i){
+				boolean add = true;
+				System.out.println("Joining " + i);
+				try {
+					thread[i].join(60 * 1000);
+					if(thread[i].isAlive()){
+						thread[i].interrupt();
+						add = false;
+					}
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				BTSolver solver = btsolver[i];
+				
+			
+				if(add){			
+					timeCount.add(((solver.getPPTimeTaken() + solver.getTimeTaken()) / 1000.0));
+					nodeCount.add(solver.getNumAssignments());
+				}
 				
 				if (!solver.hasSolution()){
 					
@@ -67,7 +90,7 @@ public class HardR {
 			}
 			
 			double averageTime = 0.0; // Average Time
-			for (int j = 0; j < timeCount.size(); j++){
+			for (int j = 10; j < timeCount.size(); j++){
 				
 				averageTime += timeCount.get(j); 
 				
@@ -76,7 +99,7 @@ public class HardR {
 			averageTime = averageTime / (double) timeCount.size();
 			
 			double averageNodes = 0.0; // Average Nodes
-			for (int k = 0; k < nodeCount.size(); k++){
+			for (int k = 10; k < nodeCount.size(); k++){
 				
 				averageNodes += nodeCount.get(k); 
 				
@@ -84,7 +107,7 @@ public class HardR {
 			averageNodes = averageNodes / (double) nodeCount.size(); 
 			
 			double standardDeviation = 0.0; 
-			for (int l = 0; l < timeCount.size(); l++){
+			for (int l = 10; l < timeCount.size(); l++){
 				
 				standardDeviation = standardDeviation + Math.pow(timeCount.get(l) - averageTime, 2); 
 				

@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import cspSolver.Constraint;
 import cspSolver.ConstraintNetwork;
+import cspSolver.Trail;
 import cspSolver.Variable;
 
 
@@ -18,6 +19,7 @@ public class Converter {
 
 		List<Variable> variables = new ArrayList<Variable>();
 		int value = 0;
+		Trail trail = new Trail();
 
 		for (int i = 0; i < sf.getN(); i++)
 		{
@@ -40,7 +42,7 @@ public class Converter {
 
 				int block = (i/sf.getP() * sf.getP()) + j/sf.getQ();
 
-				variables.add(new Variable(domain, i, j, block));
+				variables.add(new Variable(domain, i, j, block, trail));
 			}
 		}
 

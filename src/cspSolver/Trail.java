@@ -13,22 +13,26 @@ public class Trail {
 	// Properties
 	//===============================================================================
 
-	private static Stack<Object[]> trail = new Stack<Object[]>();
-	private static final Trail TRAIL = new Trail();
-	private static Stack<Integer> breadcrumbs = new Stack<Integer>();
-	private Trail()
-	{}
+	//private static Stack<Object[]> trail = new Stack<Object[]>();
+	//private static final Trail TRAIL = new Trail();
+	//private static Stack<Integer> breadcrumbs = new Stack<Integer>();
+	private  Stack<Object[]> trail = new Stack<Object[]>();
+	private  Stack<Integer> breadcrumbs = new Stack<Integer>();
+	public Trail(){
+		trail = new Stack<Object[]>();
+		breadcrumbs = new Stack<Integer>();
+	}
 
 	/**
 	 * returns the trail.
 	 * @return
 	 */
-	public static Trail getTrail()
+	public Trail getTrail()
 	{
-		return TRAIL;
+		return this;
 	}
 
-	public static void clearTrail()
+	public void clearTrail()
 	{
 		trail.clear();
 	}

@@ -15,7 +15,7 @@ public class Variable implements Iterable<Integer>
 	private boolean modified;
 	private boolean unchangeable;
 	private String name;
-	private static Trail trail = Trail.getTrail();
+	public Trail trail;
 	
 	private int oldSize;
 	
@@ -23,8 +23,9 @@ public class Variable implements Iterable<Integer>
 	// Constructors
 	//===============================================================================
 	
-	public Variable(List<Integer> possible_Values, int row, int col, int block)
+	public Variable(List<Integer> possible_Values, int row, int col, int block,Trail t)
 	{	
+		this.trail = t;
 		this.domain = new Domain(possible_Values);
 		if (size() == 1)
 		{
@@ -134,6 +135,10 @@ public class Variable implements Iterable<Integer>
 	// Modifiers
 	//===============================================================================
 	
+	public void setTrail(Trail t){
+		this.trail = t;
+	}
+	
 	/** 
 	 * Used for local Search
 	 * @param val new assignment
@@ -194,6 +199,10 @@ public class Variable implements Iterable<Integer>
 		}
 			
 		trail.push(this);
+	}
+	
+	public void clearTrail(){
+		trail.clearTrail();
 	}
 	
 	//===============================================================================
