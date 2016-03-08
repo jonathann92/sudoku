@@ -19,7 +19,7 @@ public class HardR {
 		int hardestR = -1; 
 		double longestTime = Double.MIN_VALUE; 
 		
-		Integer[] M_Values = {1, 2, 4, 8, 12, 16, 17, 18, 19, 20, 21, 22, 24, 28, 32, 36}; 
+		Integer[] M_Values = {1,2,3,4, 8, 12, 16, 17, 18, 19, 20, 21, 22, 24, 28, 32, 36}; 
 		
 		for (int M = 0; M < M_Values.length; M++){
 			System.out.println("M-Value: " + M_Values[M]);
@@ -29,6 +29,8 @@ public class HardR {
 			int numberOfFailures = 0; 
 			int iter = 200;
 			int totalLoops = 0; 
+			int timeouts = 0;
+			long end = System.currentTimeMillis() + (60 * 1000);
 			
 			Thread[] thread = new Thread[iter];
 			BTSolver[] btsolver = new BTSolver[iter];
@@ -57,19 +59,18 @@ public class HardR {
 				thread[i].start();
 			}
 			
-			try {
-				Thread.sleep(60 * 1000);
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
 			
+			boolean print = true;
 			for(int i = 0; i < iter; ++i){
-				
 				try {
-					thread[i].join(1);
+					long time = (end - System.currentTimeMillis());
+//					if(print)
+//						System.out.println(time);
+					thread[i].join(Math.max(1, time));
 					if(thread[i].isAlive()){
+						print = false;
 						thread[i].interrupt();
+						++timeouts;
 					}
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
@@ -82,7 +83,7 @@ public class HardR {
 				if(!thread[i].isInterrupted()){			
 					timeCount.add(((solver.getPPTimeTaken() + solver.getTimeTaken()) / 1000.0));
 					nodeCount.add(solver.getNumAssignments());
-				}
+				} 
 				
 				if (!solver.hasSolution()){
 					
@@ -123,6 +124,7 @@ public class HardR {
 			System.out.println("Standard Deviation of Time: " + standardDeviation);
 			System.out.println("Average Nodes: " + averageNodes);
 			System.out.println("Success Rate: " + (100 - ((double) numberOfFailures / totalLoops) * 100.0) + "%");
+			System.out.println("Timeouts: " + timeouts);
 			System.out.println("-----------------------------------------------------------------");
 			
 			if (averageTime > longestTime){
