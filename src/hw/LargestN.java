@@ -1,43 +1,54 @@
 package hw;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import cspSolver.BTSolver;
 import cspSolver.BTSolver.ConsistencyCheck;
 import cspSolver.BTSolver.ValueSelectionHeuristic;
 import cspSolver.BTSolver.VariableSelectionHeuristic;
 import sudoku.SudokuBoardGenerator;
-import sudoku.SudokuBoardReader;
 import sudoku.SudokuFile;
 
-public class HardR {
-	
-	public static void main(String[] args){ 
+public class LargestN {
+
+	public static void main(String[] args) {
+		int skip = 0;
+		double R = 0.247;
+		R = 0.0494;
+		int[] N = {9, 9, 12, 15, 16, 18, 20, 21, 24, 27, 28, 30 ,32 ,35};
+		int[] P = {3, 3, 3, 3, 4, 3, 4, 3, 4, 3, 4, 5, 4, 5};
+		int[] Q = {3, 3, 4, 5, 4, 6, 5, 7, 6, 9, 7, 6, 8, 7};
+		int size = N.length;
 		
-		int hardestR = -1; 
-		double longestTime = Double.MIN_VALUE; 
-		
-		Integer[] M_Values = {1,2,3,4, 8, 12, 16, 17, 18, 19, 20, 21, 22, 24, 28, 32, 36}; 
-		
-		for (int M = 0; M < M_Values.length; M++){
-			System.out.println("M-Value: " + M_Values[M]);
-		
+		for(int i = 0; i < size; ++i){
+			int n = N[i];
+			int p = P[i];
+			int q = Q[i];
+			int m = (int)Math.round(n*n*R);
+			System.out.println("M-Value: " + m);
+			
+			if((p*q) != n){
+				System.out.println("Error with n p q " + n + ", " + p + ", " + q);
+				System.exit(1);
+			}
+			
+			System.out.println("N P Q = " + n + ", " + p + ", " + q);
+			
 			ArrayList<Double> timeCount = new ArrayList<Double>();
 			ArrayList<Integer> nodeCount = new ArrayList<Integer>(); 
 			int numberOfFailures = 0; 
-			int threadNum = 200;
+			int threadNum = 1;
 			int timeouts = 0;
-			long end = System.currentTimeMillis() + (60 * 1000);
+			int numSolved = 0;
 			
 			Thread[] thread = new Thread[threadNum];
 			BTSolver[] btsolver = new BTSolver[threadNum];
 			
-			for (int i = 0; i < threadNum; i++){ // Change this line if you want to change the number of loops
+			for(int j = 0; j < threadNum; ++j){
+				SudokuFile sf = SudokuBoardGenerator.generateBoard(n,p,q, m); // Number of Assignments
 				
+				System.out.println("Problem board: \n" + sf);
 				
-				SudokuFile sf = SudokuBoardGenerator.generateBoard(9, 3, 3, M_Values[M]); // Number of Assignments
 				
 				BTSolver solver = new BTSolver(sf); 
 				
@@ -52,22 +63,22 @@ public class HardR {
 				solver.preprocessFlags.add("ACP");
 				solver.preprocessFlags.add("FC");
 				
-				btsolver[i] = solver;
-				thread[i] = new Thread(solver);
-				thread[i].start();
+				btsolver[j] = solver;
+				thread[j] = new Thread(solver);
 			}
 			
+			long end = System.currentTimeMillis() + (5 * 60 * 1000);
+			for(Thread t : thread)
+				t.start();
 			
-			boolean print = true;
-			for(int i = 0; i < threadNum; ++i){
+			for(int j = 0; j < threadNum; ++j) {
+				long time = (end - System.currentTimeMillis());
+				System.out.println(time);
+				
 				try {
-					long time = (end - System.currentTimeMillis());
-//					if(print)
-//						System.out.println(time);
-					thread[i].join(Math.max(1, time));
-					if(thread[i].isAlive()){
-						print = false;
-						thread[i].interrupt();
+					thread[j].join(Math.max(1,  time));
+					if(thread[j].isAlive()){
+						thread[j].interrupt();
 						++timeouts;
 					}
 				} catch (InterruptedException e) {
@@ -75,24 +86,22 @@ public class HardR {
 					e.printStackTrace();
 				}
 				
-				BTSolver solver = btsolver[i];
+				BTSolver solver = btsolver[j];
+				System.out.println("Solver Board \n" + solver.getSolution());
 				
-			
-				if(!thread[i].isInterrupted()){			
+				if(solver.hasSolution()){	
 					timeCount.add(((solver.getPPTimeTaken() + solver.getTimeTaken()) / 1000.0));
 					nodeCount.add(solver.getNumAssignments());
-				} 
+					++numSolved;
+				} else 
+					++numberOfFailures;
+
 				
-				if (!solver.hasSolution()){
-					
-					numberOfFailures += 1; 
-					
-				}
 				
-			}
+			} // ends for J
 			
 			double averageTime = 0.0; // Average Time
-			for (int j = 10; j < timeCount.size(); j++){
+			for (int j = skip; j < timeCount.size(); j++){
 				
 				averageTime += timeCount.get(j); 
 				
@@ -101,7 +110,7 @@ public class HardR {
 			averageTime = averageTime / (double) timeCount.size();
 			
 			double averageNodes = 0.0; // Average Nodes
-			for (int k = 10; k < nodeCount.size(); k++){
+			for (int k = skip; k < nodeCount.size(); k++){
 				
 				averageNodes += nodeCount.get(k); 
 				
@@ -109,7 +118,7 @@ public class HardR {
 			averageNodes = averageNodes / (double) nodeCount.size(); 
 			
 			double standardDeviation = 0.0; 
-			for (int l = 10; l < timeCount.size(); l++){
+			for (int l = skip; l < timeCount.size(); l++){
 				
 				standardDeviation = standardDeviation + Math.pow(timeCount.get(l) - averageTime, 2); 
 				
@@ -117,26 +126,26 @@ public class HardR {
 			standardDeviation = standardDeviation / (double) timeCount.size(); 
 			standardDeviation = Math.sqrt(standardDeviation); 
 			
-			
+			System.out.println("Success Rate: " + (100 - ((double) numberOfFailures / threadNum) * 100.0) + "%");
+			System.out.println("Num solved: " + numSolved);
+			System.out.println("Average Nodes: " + averageNodes);
 			System.out.println("Average Time: " + averageTime);
 			System.out.println("Standard Deviation of Time: " + standardDeviation);
-			System.out.println("Average Nodes: " + averageNodes);
-			System.out.println("Success Rate: " + (100 - ((double) numberOfFailures / threadNum) * 100.0) + "%");
 			System.out.println("Timeouts: " + timeouts);
 			System.out.println("-----------------------------------------------------------------");
 			
-			if (averageTime > longestTime){
-				
-				longestTime = averageTime; 
-				hardestR = M_Values[M]; 
-				
+			if(timeouts == threadNum){
+				break;
 			}
 			
-		}
+			
+			
+			
+
+			
+		}// END FOR I
 		
-		System.out.println("Hardest R: " + hardestR);
-		System.out.println("Longest Time: " + longestTime);
-		
+
 	}
-	
+
 }
