@@ -12,7 +12,7 @@ import sudoku.SudokuFile;
 public class LargestN {
 
 	public static void main(String[] args) {
-		int skip = 0;
+		int skip = 10;
 		double R = 0.247;
 		R = 0.0494;
 		int[] N = {9, 9, 12, 15, 16, 18, 20, 21, 24, 27, 28, 30 ,32 ,35};
@@ -37,7 +37,7 @@ public class LargestN {
 			ArrayList<Double> timeCount = new ArrayList<Double>();
 			ArrayList<Integer> nodeCount = new ArrayList<Integer>(); 
 			int numberOfFailures = 0; 
-			int threadNum = 1;
+			int threadNum = 200;
 			int timeouts = 0;
 			int numSolved = 0;
 			
@@ -85,6 +85,7 @@ public class LargestN {
 				}
 				
 				BTSolver solver = btsolver[j];
+				
 				
 				if(solver.hasSolution()){	
 					timeCount.add(((solver.getPPTimeTaken() + solver.getTimeTaken()) / 1000.0));

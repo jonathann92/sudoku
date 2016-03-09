@@ -18,18 +18,23 @@ public class HardR {
 		
 		int hardestR = -1; 
 		double longestTime = Double.MIN_VALUE; 
+		int n = 0;
+		int p = 0;
+		int q = 0;
 		
-		Integer[] M_Values = {1,2,3,4, 8, 12, 16, 17, 18, 19, 20, 21, 22, 24, 28, 32, 36}; 
+		double[] R = {0.0494, 0.0494, 0.0494, 0.0988, 0.148, 0.198, 0.210, 0.222, 0.235, 0.247, 0.259, 0.272, 0.296, 0.346, 0.395, 0.444};
 		
-		for (int M = 0; M < M_Values.length; M++){
-			System.out.println("M-Value: " + M_Values[M]);
+		
+		for (int M = 0; M < R.length; M++){
+			int m = (int) Math.round(n*n*R[M]);
+			System.out.println("M-Value: " + m);
 		
 			ArrayList<Double> timeCount = new ArrayList<Double>();
 			ArrayList<Integer> nodeCount = new ArrayList<Integer>(); 
 			int numberOfFailures = 0; 
 			int threadNum = 200;
 			int timeouts = 0;
-			long end = System.currentTimeMillis() + (60 * 1000);
+			long end = System.currentTimeMillis() + (60 * 60 * 1000);
 			
 			Thread[] thread = new Thread[threadNum];
 			BTSolver[] btsolver = new BTSolver[threadNum];
@@ -37,7 +42,7 @@ public class HardR {
 			for (int i = 0; i < threadNum; i++){ // Change this line if you want to change the number of loops
 				
 				
-				SudokuFile sf = SudokuBoardGenerator.generateBoard(9, 3, 3, M_Values[M]); // Number of Assignments
+				SudokuFile sf = SudokuBoardGenerator.generateBoard(n, p, q, m); // Number of Assignments
 				
 				BTSolver solver = new BTSolver(sf); 
 				
@@ -128,7 +133,7 @@ public class HardR {
 			if (averageTime > longestTime){
 				
 				longestTime = averageTime; 
-				hardestR = M_Values[M]; 
+				hardestR = m;
 				
 			}
 			
