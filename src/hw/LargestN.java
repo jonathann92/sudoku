@@ -14,9 +14,9 @@ public class LargestN {
 	public static void main(String[] args) {
 		int skip = 0;
 		double R = 0.247;
-		int[] N = {9, 9, 12, 15, 16, 18, 20, 21, 24, 27, 28, 30 ,32 ,35};
-		int[] P = {3, 3, 3, 3, 4, 3, 4, 3, 4, 3, 4, 5, 4, 5};
-		int[] Q = {3, 3, 4, 5, 4, 6, 5, 7, 6, 9, 7, 6, 8, 7};
+		int[] N = { 9, 12, 15, 16, 18, 20, 21, 24, 27, 28, 30 ,32 ,35};
+		int[] P = { 3, 3, 3, 4, 3, 4, 3, 4, 3, 4, 5, 4, 5};
+		int[] Q = { 3, 4, 5, 4, 6, 5, 7, 6, 9, 7, 6, 8, 7};
 		int size = N.length;
 		
 		for(int i = 0; i < size; ++i){
@@ -65,7 +65,7 @@ public class LargestN {
 				thread[j] = new Thread(solver);
 			}
 			
-			long end = System.currentTimeMillis() + (5 * 60 * 1000);
+			long end = System.currentTimeMillis() + (60 * 60 * 1000);
 			for(Thread t : thread)
 				t.start();
 			
