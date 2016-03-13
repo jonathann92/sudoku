@@ -449,7 +449,6 @@ public class BTSolver implements Runnable{
 			break;
 		}
 		
-		System.out.println("Size of degree = " + size);
 		
 		for(Variable v : network.getVariables()){
 			v.setDH(size);
