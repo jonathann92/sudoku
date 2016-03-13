@@ -16,8 +16,11 @@ class Report {
   public static void main(String[] args){
 
     List<String> bestFlags = part2();
+	System.out.println("\n\n\n***************************************************\n\n\n");
     double R = hardRpart3(bestFlags); // part 3
+	System.out.println("\n\n\n***************************************************\n\n\n");
     largeN(R); // part 4
+	System.out.println("\n\n\n***************************************************\n\n\n");
     hardRpart5(); // part 5
   } // end main
 
@@ -63,20 +66,14 @@ class Report {
     statistics(a);
     a.clear();
 
-    a.add("FC");
-    a.add("MRV");
-    a.add("ACP");
-    a.add("MAC");
-    a.add("LCV");
-    statistics(a);
+    statistics(best);
     a.clear();
-
 
     return best;
   }
 
   public static void statistics(List<String> flags) {
-		long timeout = 30 * 1000;
+		long timeout = 60 * 60 * 1000;
 
 		System.out.println(flags);
 
@@ -97,7 +94,7 @@ class Report {
 			Thread t1 = new Thread(solver);
 			t1.start();
 			try {
-				t1.join();
+				t1.join(timeout);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -197,18 +194,19 @@ class Report {
 	}
 
 	private static List<String> bestFlags() {
+		System.out.println("\n\n\n***************************************************\n\n\n");
+		System.out.println("Finding Best Flags");
 		long timeout =  Long.MAX_VALUE;
 
-		String input = "ExampleSudokuFiles/PM2.txt";
+		String input = "ExampleSudokuFiles/PH2.txt";
 		SudokuFile sf = SudokuBoardReader.readFile(input);
 
 		System.out.println(sf);
 
-
-
 		// Figure out best combination of flags
 		List<Long> times = new ArrayList<Long>();
 		List<List<String>> arguments = new ArrayList<List<String>>();
+	
 
 		for(int i = 0; i < 32; ++i){
 			BTSolver solver = new BTSolver(sf);
@@ -238,6 +236,9 @@ class Report {
 			}
 			System.out.println("\n*********************\n");
 		}
+		
+		
+		
 
 		long bestTime = Long.MAX_VALUE;
 		List<String> bestFlags = null;
@@ -270,7 +271,7 @@ class Report {
 			int numberOfFailures = 0;
 			int threadNum = 1;
 			int timeouts = 0;
-			long end = System.currentTimeMillis() + (60 * 1000);
+			long end = System.currentTimeMillis() + (60 * 10 * 1000);
 
 			Thread[] thread = new Thread[threadNum];
 			BTSolver[] btsolver = new BTSolver[threadNum];
@@ -375,6 +376,8 @@ class Report {
   public static void hardRpart5(){
     int hardestR = -1;
 		double longestTime = Double.MIN_VALUE;
+		
+		//we have to hard code this in
 		int n = 15;
 		int p = 3;
 		int q = 5;

@@ -16,8 +16,8 @@ public class Variable implements Iterable<Integer>
 	private boolean unchangeable;
 	private String name;
 	public Trail trail;
-	
 	private int oldSize;
+	int dh;
 	
 	//===============================================================================
 	// Constructors
@@ -37,6 +37,7 @@ public class Variable implements Iterable<Integer>
 		this.block = block;
 		this.name = "v" + namingCounter++;
 		this.oldSize = size();
+		this.dh = 0;
 	}
 	
 	public Variable(Variable v)
@@ -52,6 +53,9 @@ public class Variable implements Iterable<Integer>
 	//===============================================================================
 	// Accessors
 	//===============================================================================
+	public int getDH(){
+		return dh;
+	}
 	
 	/**
 	 * Used for local search. Used to differentiate between intialized assignments
@@ -134,6 +138,14 @@ public class Variable implements Iterable<Integer>
 	//===============================================================================
 	// Modifiers
 	//===============================================================================
+	
+	public void setDH(int dh){
+		this.dh = dh;
+	}
+	
+	public void minusDH(){
+		--dh;
+	}
 	
 	public void setTrail(Trail t){
 		this.trail = t;
