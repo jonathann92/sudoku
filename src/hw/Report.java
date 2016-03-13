@@ -15,20 +15,20 @@ import sudoku.SudokuFile;
 class Report {
   public static void main(String[] args){
 
-    part2(args);
-    hardRpart3(); // part 3
-    largeN(); // part 4
+    List<String> bestFlags = part2();
+    double R = hardRpart3(bestFlags); // part 3
+    largeN(R); // part 4
     hardRpart5(); // part 5
   } // end main
 
-  public static void part2(String[] args){
+  public static List<String> part2(){
      List<String> a = new ArrayList<String>();
 		// for(String tag:args){
 		// 	arguments.add(tag.toUpperCase());
 		// }
 
     // Find the bestFlags
-    //bestFlags();
+    List<String> best = bestFlags();
 
     // Checking to see flags performance
     // FC
@@ -72,6 +72,7 @@ class Report {
     a.clear();
 
 
+    return best;
   }
 
   public static void statistics(List<String> flags) {
@@ -195,7 +196,7 @@ class Report {
 		return args;
 	}
 
-	private static void bestFlags() {
+	private static List<String> bestFlags() {
 		long timeout =  Long.MAX_VALUE;
 
 		String input = "ExampleSudokuFiles/PM2.txt";
@@ -250,9 +251,11 @@ class Report {
 
 		System.out.println("Best flags are: " + bestFlags);
 		System.out.println("Best time is: " + bestTime);
+		
+		return bestFlags;
 	}
 
-  public static void hardRpart3(){
+  public static double hardRpart3(List<String> flags){
     int hardestR = -1;
 		double longestTime = Double.MIN_VALUE;
 
@@ -265,7 +268,7 @@ class Report {
 			ArrayList<Double> timeCount = new ArrayList<Double>();
 			ArrayList<Integer> nodeCount = new ArrayList<Integer>();
 			int numberOfFailures = 0;
-			int threadNum = 200;
+			int threadNum = 1;
 			int timeouts = 0;
 			long end = System.currentTimeMillis() + (60 * 1000);
 
@@ -278,18 +281,10 @@ class Report {
 				SudokuFile sf = SudokuBoardGenerator.generateBoard(9, 3, 3, M_Values[M]); // Number of Assignments
 
 				BTSolver solver = new BTSolver(sf);
-
-				solver.setValueSelectionHeuristic(ValueSelectionHeuristic.None);
-				solver.setVariableSelectionHeuristic(VariableSelectionHeuristic.None);
-				solver.setConsistencyChecks(ConsistencyCheck.None);
-
-				solver.setConsistencyChecks(ConsistencyCheck.ForwardChecking);
-				solver.setConsistencyChecks(ConsistencyCheck.ArcConsistency);
-				solver.setVariableSelectionHeuristic(VariableSelectionHeuristic.MinimumRemainingValue);
-				solver.setValueSelectionHeuristic(ValueSelectionHeuristic.LeastConstrainingValue);
-				solver.preprocessFlags.add("ACP");
-				solver.preprocessFlags.add("FC");
-
+				
+				
+				heuristics(solver, flags);
+				
 				btsolver[i] = solver;
 				thread[i] = new Thread(solver);
 				thread[i].start();
@@ -374,6 +369,7 @@ class Report {
 
 		System.out.println("Hardest R: " + hardestR);
 		System.out.println("Longest Time: " + longestTime);
+		return hardestR;
   }
 
   public static void hardRpart5(){
@@ -395,7 +391,7 @@ class Report {
 			ArrayList<Double> timeCount = new ArrayList<Double>();
 			ArrayList<Integer> nodeCount = new ArrayList<Integer>();
 			int numberOfFailures = 0;
-			int threadNum = 50;
+			int threadNum = 1;
 			int timeouts = 0;
 			long end = System.currentTimeMillis() + (10 * 60 * 1000);
 
@@ -506,14 +502,14 @@ class Report {
 		System.out.println("Longest Time: " + longestTime);
   }
 
-  public static void largeN(){
-    int skip = 0;
-		double R = 0.247;
+  public static void largeN(double R){
+	  	int skip = 0;
 		int[] N = { 9, 12, 15, 16, 18, 20, 21, 24, 27, 28, 30 ,32 ,35};
 		int[] P = { 3, 3, 3, 4, 3, 4, 3, 4, 3, 4, 5, 4, 5};
 		int[] Q = { 3, 4, 5, 4, 6, 5, 7, 6, 9, 7, 6, 8, 7};
 		int size = N.length;
 
+		
 		for(int i = 0; i < size; ++i){
 			int n = N[i];
 			int p = P[i];
@@ -531,7 +527,7 @@ class Report {
 			ArrayList<Double> timeCount = new ArrayList<Double>();
 			ArrayList<Integer> nodeCount = new ArrayList<Integer>();
 			int numberOfFailures = 0;
-			int threadNum = 200;
+			int threadNum = 1;
 			int timeouts = 0;
 			int numSolved = 0;
 
