@@ -34,7 +34,7 @@ public class HardRPart5 {
 			ArrayList<Double> timeCount = new ArrayList<Double>();
 			ArrayList<Integer> nodeCount = new ArrayList<Integer>();
 			int numberOfFailures = 0;
-			int threadNum = 2;
+			int threadNum = 50;
 			int timeouts = 0;
 			long end = System.currentTimeMillis() + (10 * 60 * 1000);
 
