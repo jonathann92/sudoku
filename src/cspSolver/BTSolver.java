@@ -233,15 +233,8 @@ public class BTSolver implements Runnable{
 	private boolean forwardChecking(Variable v){
 		int num = v.getAssignment();
 		for(Variable vOther : network.getNeighborsOfVariable(v)){
-			int size = vOther.size();
 			vOther.removeValueFromDomain(num);
-			if(size == 0) return false;
-			if(vOther.isAssigned())
-			{
-				if(!isConsistent(vOther)) return false;
-				if(size != vOther.size())
-					decrementNeighborDH(vOther);
-			}			
+			if(vOther.size() == 0 || ( vOther.isAssigned() && !isConsistent(vOther))) return false;
 		}
 		return true;
 	}
@@ -434,32 +427,6 @@ public class BTSolver implements Runnable{
 			
 		return next;
 	}
-	
-	private void decrementNeighborDH(Variable v){
-		for(Variable neighbor : network.getNeighborsOfVariable(v)){
-			if(v.isAssigned()) continue;
-			neighbor.minusDH();
-		}
-	}
-	
-	private void preprocessDH(){
-		int size = 0;
-		for(Variable v : network.getVariables()){
-			size = network.getNeighborsOfVariable(v).size();
-			break;
-		}
-		
-		
-		for(Variable v : network.getVariables()){
-			v.setDH(size);
-		}
-		
-		for(Variable v : network.getVariables())
-		{
-			if(v.isAssigned())
-				decrementNeighborDH(v);
-		}
-	}
 
 	/**
 	 * TODO: Implement Degree heuristic
@@ -467,18 +434,7 @@ public class BTSolver implements Runnable{
 	 */
 	private Variable getDegree()
 	{
-		Variable next = null;
-		int max = Integer.MIN_VALUE;
-		
-		for(Variable v : network.getVariables()){
-			if(v.isAssigned()) continue;
-			if(v.getDH() > max){
-				next = v;
-				max = v.getDH();
-			}
-		}
-		
-		/*
+
 		Variable next = null;
 		int max = -1;
 		
@@ -494,11 +450,12 @@ public class BTSolver implements Runnable{
 				max = count;
 			}
 		}
-		*/
+		
 		return next;
 	}
 	
 	private Variable getMRVDH(){
+		Variable next = null;
 		List<Variable> ties = new ArrayList<Variable>();
 		int min = Integer.MAX_VALUE;
 		
@@ -516,19 +473,8 @@ public class BTSolver implements Runnable{
 		}
 		
 		// DH part
-		
-		Variable next = null;
 		int max = -1;
 		
-		for(Variable v : ties){
-			if(v.getDH() > max){
-				next = v;
-				max = v.getDH();
-			}
-		}
-		
-		
-		/*
 		for(Variable v : ties){
 			int count = 0;
 			for(Variable neighbor : network.getNeighborsOfVariable(v)){
@@ -541,7 +487,6 @@ public class BTSolver implements Runnable{
 				max = count;
 			}
 		}
-		*/
 		
 		return next;
 	}
@@ -634,13 +579,6 @@ public class BTSolver implements Runnable{
 	
 	
 	private boolean preprocess(){
-		if(this.varHeuristics == VariableSelectionHeuristic.MRVDH 
-		|| this.varHeuristics == VariableSelectionHeuristic.Degree
-		   )
-		{
-			preprocessDH();
-		}
-		
 		if(this.preprocessFlags.contains("FC")){
 			
 			//System.out.println("Preprocessing FC");
@@ -712,7 +650,6 @@ public class BTSolver implements Runnable{
 				{
 					if(!var.isAssigned())
 					{
-						System.out.println(var);
 						System.out.println(var.getName() +" IS NOT ASSIGNED");
 						System.out.println(sudokuGrid);
 						throw new VariableSelectionException("Something happened with the variable selection heuristic");
@@ -734,7 +671,6 @@ public class BTSolver implements Runnable{
 
 				//check a value
 				v.updateDomain(new Domain(i));
-				decrementNeighborDH(v);
 				numAssignments++;
 				boolean isConsistent = checkConsistency(v);
 

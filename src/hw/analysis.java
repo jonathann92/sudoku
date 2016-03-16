@@ -15,22 +15,55 @@ import sudoku.SudokuFile;
 public class analysis {
 	
 	public static void main(String[] args) {
-		if(args.length < 1){
-			System.err.println("Need atleast 1 flag (FC MRV DH LCV MAC ACP)");
-			//return;
-		}
 		
-		List<String> arguments = new ArrayList<String>();
-		for(String tag:args){
-			arguments.add(tag.toUpperCase());
-		}
 		
-		// Find the bestFlags
-		//bestFlags();
-		
-		// Part 2 timing the flags
-		statistics(arguments);
-		
+		List<String> a = new ArrayList<String>();
+
+
+    // Find the bestFlags
+    bestFlags();
+    
+    
+    // Checking to see flags performance
+    // FC
+    a.add("FC");
+		statistics(a);
+    a.clear();
+
+    a.add("MRV");
+    statistics(a);
+    a.clear();
+
+    a.add("DH");
+    statistics(a);
+    a.clear();
+
+    a.add("LCV");
+    statistics(a);
+    a.clear();
+
+    a.add("ACP");
+    statistics(a);
+    a.clear();
+
+    a.add("MAC");
+    statistics(a);
+    a.clear();
+
+    a.add("FC");
+    a.add("MRV");
+    a.add("DH");
+    a.add("LCV");
+    statistics(a);
+    a.clear();
+    
+
+    a.add("FC");
+    a.add("MRV");
+    a.add("ACP");
+    a.add("MAC");
+    a.add("LCV");
+    statistics(a);
 	}
 
 

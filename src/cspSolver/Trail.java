@@ -63,8 +63,7 @@ public class Trail {
 	 */
 	public void push(Variable v)
 	{
-		Integer dh = new Integer(v.getDH());
-		Object[] vPair = { v, new Domain(v.getDomain()), dh};
+		Object[] vPair = { v, new Domain(v.getDomain())};
 		trail.push(vPair);
 	}
 
@@ -82,9 +81,6 @@ public class Trail {
 			Object[] vPair = trail.pop();
 			Variable v = (Variable) vPair[0];
 			v.setDomain((Domain) vPair[1]);
-			int dh = (int)vPair[2];
-
-			v.setDH((int)vPair[2]);
 		}
 	}
 }
